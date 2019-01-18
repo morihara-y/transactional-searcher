@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration>
+<configuration>
+  <!-- for developers log back sample -->
+  <!-- log location -->
+  <property name="logDir" value="./tomcat-log/sample/" />
+  <property name="fileName" value="TransactionApp" />
+  <property name="errorFileName" value="TransactionAppErr" />
+  <property name="fileExtension" value=".log" />
+
+  <!-- max Property -->
+  <property name="maxFileSize" value="10MB"></property>
+  <property name="maxHistory" value="30"></property>
+  <!-- layoutPtn -->
+  <property name="spring"
+    value="%d{HH:mm:ss.SSS} %-5level %logger{30} [Spring] %msg%n"></property>
+  <property name="transaction"
+    value="%d{HH:mm:ss.SSS} %-5level %logger{30} [App] %msg%n"></property>
+  <property name="rollingPtn" value=".%d{yyyy-MM-dd}.%i"></property>
+
+  <!-- for Spring -->
+  <appender name="CONSOLE_SPRING" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>${spring}</pattern>
+    </encoder>
+  </appender>
+  
+  <!-- for transaction -->
+  <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>${transaction}</pattern>
+    </encoder>
+  </appender>
+  <appender name="CONSOLE_REQUEST" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%d{HH:mm:ss.SSS} %-5level [Request] %msg%n</pattern>
+    </encoder>
+  </appender>
+  
+  <!-- Regular Setting for transaction -->
+  <appender name="NORMAL"
+    class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${logDir}${fileName}${fileExtension}</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${logDir}${fileName}${rollingPtn}${fileExtension}</fileNamePattern>
+      <timeBasedFileNamingAndTriggeringPolicy
+        class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+        <maxFileSize>${maxFileSize}</maxFileSize>
+      </timeBasedFileNamingAndTriggeringPolicy>
+      <maxHistory>${maxHistory}</maxHistory>
+    </rollingPolicy>
+
+    <encoder>
+      <pattern>${transaction}</pattern>
+    </encoder>
+  </appender>
+
+  <!-- Regular Setting for transaction -->
+  <appender name="ERROR"
+    class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${logDir}${errorFileName}${fileExtension}</file>
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+      <level>ERROR</level>
+    </filter>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${logDir}${errorFileName}${rollingPtn}${fileExtension}</fileNamePattern>
+      <timeBasedFileNamingAndTriggeringPolicy
+        class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+        <maxFileSize>${maxFileSize}</maxFileSize>
+      </timeBasedFileNamingAndTriggeringPolicy>
+      <maxHistory>${maxHistory}</maxHistory>
+    </rollingPolicy>
+
+    <encoder>
+      <pattern>${transaction}</pattern>
+    </encoder>
+  </appender>
+
+  <!-- logger -->
+  <logger name="org.springframework" level="WARN" additivity="false">
+    <appender-ref ref="CONSOLE_SPRING" />
+  </logger>
+  
+  <logger name="com.github.morihara" level="INFO" additivity="false">
+    <appender-ref ref="CONSOLE" />
+    <appender-ref ref="NORMAL" />
+    <appender-ref ref="ERROR" />
+  </logger>
+
+</configuration>
