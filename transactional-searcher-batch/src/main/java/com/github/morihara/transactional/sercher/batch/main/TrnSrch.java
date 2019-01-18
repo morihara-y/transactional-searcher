@@ -10,7 +10,7 @@ import com.github.morihara.transactional.sercher.batch.executor.OutputApplicatio
 
 @SpringBootApplication
 @Import({MainConfig.class})
-public class Main {
+public class TrnSrch {
 
     public static void main(String[] args) {
         SpringApplication.run(InvestigateApplicationRunner.class, args);
