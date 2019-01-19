@@ -10,5 +10,5 @@ import lombok.Data;
 public class RelatedDaoCodeDto {
     private UUID transactionMethodId;
     private int seq;
-    private SourceCodeVo sourceCodeVo;
+    private SourceCodeVo relatedDaoCodeVo;
 }
