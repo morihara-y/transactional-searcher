@@ -1,10 +1,10 @@
 package com.github.morihara.transactional.sercher.dto.vo;
 
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 
 @Builder
-@Data
+@Getter
 public class SourceCodeVo {
     private String packageName;
     private String className;
