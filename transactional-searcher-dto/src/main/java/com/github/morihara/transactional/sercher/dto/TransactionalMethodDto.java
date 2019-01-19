@@ -12,5 +12,6 @@ public class TransactionalMethodDto {
     private UUID transactionMethodId;
     private SourceCodeVo sourceCodeVo;
     private boolean isDeveloped;
+    private int ticketNo;
     private List<RelatedDaoCodeDto> relatedDaoCodes;
 }

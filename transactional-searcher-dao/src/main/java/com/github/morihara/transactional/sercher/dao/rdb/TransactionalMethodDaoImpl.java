@@ -4,6 +4,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
@@ -18,7 +19,7 @@ public class TransactionalMethodDaoImpl implements TransactionalMethodDao {
     private final JdbcTemplate jdbc;
 
     private final RelatedDaoCodeDao relatedDaoCodeDao;
-    
+
     private static final RowMapper<TransactionalMethodDto> ROW_MAPPER = (rs, i) -> {
         SourceCodeVo sourceCodeVo = SourceCodeVo.builder()
                 .packageName(rs.getString("package_name"))
@@ -26,27 +27,29 @@ public class TransactionalMethodDaoImpl implements TransactionalMethodDao {
                 .methodName(rs.getString("method_name"))
                 .methodParam(rs.getString("method_param"))
                 .methodType(rs.getString("method_type"))
-                .line(rs.getInt("line"))
-                .build();
+                .line(rs.getInt("line")).build();
         return TransactionalMethodDto.builder()
                 .transactionMethodId(UUID.fromString(rs.getString("transaction_method_id")))
                 .sourceCodeVo(sourceCodeVo)
                 .isDeveloped(rs.getBoolean("is_developed"))
+                .ticketNo(rs.getInt("ticket_no"))
                 .build();
     };
-    
+
     @Override
     public void insert(TransactionalMethodDto transactionalMethodDto) {
-        jdbc.update("insert into transactional_method ("
-                + "transaction_method_id, "
-                + "package_name, "
-                + "class_name, "
-                + "method_name, "
-                + "method_param, "
-                + "method_type, "
-                + "line, "
-                + "is_developed"
-                + ") values (?, ?, ?, ?, ?, ?, ?, ?)",
+        jdbc.update(
+                "insert into transactional_method ("
+                        + "transaction_method_id, "
+                        + "package_name, "
+                        + "class_name, "
+                        + "method_name, "
+                        + "method_param, "
+                        + "method_type, "
+                        + "line, "
+                        + "is_developed, "
+                        + "ticket_no"
+                        + ") values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 transactionalMethodDto.getTransactionMethodId(),
                 transactionalMethodDto.getSourceCodeVo().getPackageName(),
                 transactionalMethodDto.getSourceCodeVo().getClassName(),
@@ -54,23 +57,28 @@ public class TransactionalMethodDaoImpl implements TransactionalMethodDao {
                 transactionalMethodDto.getSourceCodeVo().getMethodParam(),
                 transactionalMethodDto.getSourceCodeVo().getMethodType(),
                 transactionalMethodDto.getSourceCodeVo().getLine(),
-                transactionalMethodDto.isDeveloped());
+                transactionalMethodDto.isDeveloped(),
+                transactionalMethodDto.getTicketNo());
         relatedDaoCodeDao.upsert(transactionalMethodDto.getTransactionMethodId(),
                 transactionalMethodDto.getRelatedDaoCodes());
     }
-    
+
     @Override
     public void updateDevelopStatus(TransactionalMethodDto transactionalMethodDto) {
-        jdbc.update("update transactional_method set is_developed = ? where transaction_method_id = ?",
-                transactionalMethodDto.isDeveloped(), transactionalMethodDto.getTransactionMethodId());
+        jdbc.update(
+                "update transactional_method set is_developed = ?, ticket_no = ?"
+                        + " where transaction_method_id = ?",
+                transactionalMethodDto.isDeveloped(),
+                transactionalMethodDto.getTicketNo(),
+                transactionalMethodDto.getTransactionMethodId());
     }
-    
+
     @Override
     public void delete(UUID transactionalMethodId) {
         jdbc.update("delete from transactional_method where transaction_method_id = ?",
                 transactionalMethodId);
     }
-    
+
     @Override
     public List<TransactionalMethodDto> fetchByPackageName(String packageName) {
         String sql = "select * from transactional_method where package_name = ? "
@@ -81,6 +89,15 @@ public class TransactionalMethodDaoImpl implements TransactionalMethodDao {
                 ps.setString(1, packageName);
             }
         };
-        return jdbc.query(sql, pss, ROW_MAPPER);
+        List<TransactionalMethodDto> dtos = jdbc.query(sql, pss, ROW_MAPPER);
+        return joinRelatedDaoCode(dtos);
+    }
+
+    private List<TransactionalMethodDto> joinRelatedDaoCode(List<TransactionalMethodDto> dtos) {
+        return dtos.stream().map(dto -> {
+            UUID transactionalMethodId = dto.getTransactionMethodId();
+            dto.setRelatedDaoCodes(relatedDaoCodeDao.fetchByRelatedMethodId(transactionalMethodId));
+            return dto;
+        }).collect(Collectors.toList());
     }
 }
