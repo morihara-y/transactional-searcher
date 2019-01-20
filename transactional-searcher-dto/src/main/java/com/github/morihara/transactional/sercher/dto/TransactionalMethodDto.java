@@ -9,7 +9,7 @@ import lombok.Data;
 @Builder
 @Data
 public class TransactionalMethodDto {
-    private UUID transactionMethodId;
+    private UUID transactionalMethodId;
     private SourceCodeVo sourceCodeVo;
     private boolean isDeveloped;
     private int ticketNo;

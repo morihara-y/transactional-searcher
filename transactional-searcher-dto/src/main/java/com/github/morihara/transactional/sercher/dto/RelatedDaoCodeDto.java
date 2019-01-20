@@ -8,7 +8,7 @@ import lombok.Data;
 @Builder
 @Data
 public class RelatedDaoCodeDto {
-    private UUID transactionMethodId;
+    private UUID transactionalMethodId;
     private int seq;
     private SourceCodeVo relatedDaoCodeVo;
 }

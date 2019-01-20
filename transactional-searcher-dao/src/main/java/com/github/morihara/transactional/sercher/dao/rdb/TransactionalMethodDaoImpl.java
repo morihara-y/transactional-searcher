@@ -29,7 +29,7 @@ public class TransactionalMethodDaoImpl implements TransactionalMethodDao {
                 .methodType(rs.getString("method_type"))
                 .line(rs.getInt("line")).build();
         return TransactionalMethodDto.builder()
-                .transactionMethodId(UUID.fromString(rs.getString("transaction_method_id")))
+                .transactionalMethodId(UUID.fromString(rs.getString("transactional_method_id")))
                 .sourceCodeVo(sourceCodeVo)
                 .isDeveloped(rs.getBoolean("is_developed"))
                 .ticketNo(rs.getInt("ticket_no"))
@@ -40,7 +40,7 @@ public class TransactionalMethodDaoImpl implements TransactionalMethodDao {
     public void insert(TransactionalMethodDto transactionalMethodDto) {
         jdbc.update(
                 "insert into transactional_method ("
-                        + "transaction_method_id, "
+                        + "transactional_method_id, "
                         + "package_name, "
                         + "class_name, "
                         + "method_name, "
@@ -50,7 +50,7 @@ public class TransactionalMethodDaoImpl implements TransactionalMethodDao {
                         + "is_developed, "
                         + "ticket_no"
                         + ") values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                transactionalMethodDto.getTransactionMethodId(),
+                transactionalMethodDto.getTransactionalMethodId(),
                 transactionalMethodDto.getSourceCodeVo().getPackageName(),
                 transactionalMethodDto.getSourceCodeVo().getClassName(),
                 transactionalMethodDto.getSourceCodeVo().getMethodName(),
@@ -59,7 +59,7 @@ public class TransactionalMethodDaoImpl implements TransactionalMethodDao {
                 transactionalMethodDto.getSourceCodeVo().getLine(),
                 transactionalMethodDto.isDeveloped(),
                 transactionalMethodDto.getTicketNo());
-        relatedDaoCodeDao.upsert(transactionalMethodDto.getTransactionMethodId(),
+        relatedDaoCodeDao.upsert(transactionalMethodDto.getTransactionalMethodId(),
                 transactionalMethodDto.getRelatedDaoCodes());
     }
 
@@ -67,15 +67,15 @@ public class TransactionalMethodDaoImpl implements TransactionalMethodDao {
     public void updateDevelopStatus(TransactionalMethodDto transactionalMethodDto) {
         jdbc.update(
                 "update transactional_method set is_developed = ?, ticket_no = ?"
-                        + " where transaction_method_id = ?",
+                        + " where transactional_method_id = ?",
                 transactionalMethodDto.isDeveloped(),
                 transactionalMethodDto.getTicketNo(),
-                transactionalMethodDto.getTransactionMethodId());
+                transactionalMethodDto.getTransactionalMethodId());
     }
 
     @Override
     public void delete(UUID transactionalMethodId) {
-        jdbc.update("delete from transactional_method where transaction_method_id = ?",
+        jdbc.update("delete from transactional_method where transactional_method_id = ?",
                 transactionalMethodId);
     }
 
@@ -101,7 +101,7 @@ public class TransactionalMethodDaoImpl implements TransactionalMethodDao {
             return Optional.empty();
         }
         TransactionalMethodDto dto = dtos.get(0);
-        UUID transactionalMethodId = dto.getTransactionMethodId();
+        UUID transactionalMethodId = dto.getTransactionalMethodId();
         dto.setRelatedDaoCodes(relatedDaoCodeDao.fetchByRelatedMethodId(transactionalMethodId));
         return Optional.of(dto);
     }

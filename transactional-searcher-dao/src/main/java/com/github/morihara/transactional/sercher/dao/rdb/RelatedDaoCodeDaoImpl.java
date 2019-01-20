@@ -28,7 +28,7 @@ public class RelatedDaoCodeDaoImpl implements RelatedDaoCodeDao {
                 .line(rs.getInt("line"))
                 .build();
         return RelatedDaoCodeDto.builder()
-                .transactionMethodId(UUID.fromString(rs.getString("transaction_method_id")))
+                .transactionalMethodId(UUID.fromString(rs.getString("transactional_method_id")))
                 .seq(rs.getInt("seq"))
                 .relatedDaoCodeVo(relatedDaoCodeVo)
                 .build();
@@ -42,7 +42,7 @@ public class RelatedDaoCodeDaoImpl implements RelatedDaoCodeDao {
 
     @Override
     public List<RelatedDaoCodeDto> fetchByRelatedMethodId(UUID transactionalMethodId) {
-        String sql = "select * from related_dao_code where transaction_method_id = ? "
+        String sql = "select * from related_dao_code where transactional_method_id = ? "
                 + "order by package_name, class_name, method_name, method_param";
         PreparedStatementSetter pss = new PreparedStatementSetter() {
             @Override
@@ -54,14 +54,14 @@ public class RelatedDaoCodeDaoImpl implements RelatedDaoCodeDao {
     }
 
     private void delete(UUID transactionalMethodId) {
-        jdbc.update("delete from related_dao_code where transaction_method_id = ?",
+        jdbc.update("delete from related_dao_code where transactional_method_id = ?",
                 transactionalMethodId);
     }
 
     private void batchInsert(List<RelatedDaoCodeDto> relatedDaoCodes) {
         final int batchSize = 100;
         final String sql = "insert into related_dao_code ("
-                + "transaction_method_id, "
+                + "transactional_method_id, "
                 + "seq, "
                 + "package_name, "
                 + "class_name, "
@@ -74,7 +74,7 @@ public class RelatedDaoCodeDaoImpl implements RelatedDaoCodeDao {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
                 RelatedDaoCodeDto relatedDaoCodeDto = relatedDaoCodes.get(i); 
-                ps.setString(1, relatedDaoCodeDto.getTransactionMethodId().toString());
+                ps.setString(1, relatedDaoCodeDto.getTransactionalMethodId().toString());
             }            
             @Override
             public int getBatchSize() {
