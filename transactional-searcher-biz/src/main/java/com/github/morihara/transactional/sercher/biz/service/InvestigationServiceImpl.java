@@ -5,8 +5,10 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
+import com.github.morihara.transactional.sercher.biz.source.search.service.CallHierarchyService;
 import com.github.morihara.transactional.sercher.dao.rdb.TransactionalMethodDao;
 import com.github.morihara.transactional.sercher.dao.spoon.SourceCodeFetchDao;
+import com.github.morihara.transactional.sercher.dto.RelatedDaoCodeDto;
 import com.github.morihara.transactional.sercher.dto.TransactionalMethodDto;
 import com.github.morihara.transactional.sercher.dto.vo.SourceCodeVo;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 public class InvestigationServiceImpl implements InvestigationService {
     private final TransactionalMethodDao transactionalMethodDao;
     private final SourceCodeFetchDao sourceCodeFetchDao;
+    private final CallHierarchyService callHierarchyService;
     
     @Override
     public List<String> getPackageNames(String sourceFolderPath) {
@@ -39,14 +42,19 @@ public class InvestigationServiceImpl implements InvestigationService {
 
     @Override
     public boolean isRDBUpdateService(TransactionalMethodDto transactionalMethodDto) {
-        // TODO Auto-generated method stub
+        List<RelatedDaoCodeDto> relatedDaoCodes =
+                callHierarchyService.fetchRelatedDaoCodesByCallHierarchy(transactionalMethodDto);
+        if (relatedDaoCodes.size() > 0) {
+            transactionalMethodDto.setRelatedDaoCodes(relatedDaoCodes);
+            return true;
+        }
         return false;
     }
 
     @Override
     public boolean isManagedTransactional(TransactionalMethodDto transactionalMethodDto) {
-        // TODO Auto-generated method stub
-        return false;
+        return sourceCodeFetchDao
+                .hasTransactionalAnnotation(transactionalMethodDto.getSourceCodeVo());
     }
 
     @Override
@@ -62,10 +70,9 @@ public class InvestigationServiceImpl implements InvestigationService {
 
     private TransactionalMethodDto makeNewTransactionalMethodDto(SourceCodeVo sourceCodeVo) {
         return TransactionalMethodDto.builder()
-                .transactionMethodId(UUID.randomUUID())
+                .transactionalMethodId(UUID.randomUUID())
                 .sourceCodeVo(sourceCodeVo)
                 .isDeveloped(false)
                 .build();
     }
-
 }

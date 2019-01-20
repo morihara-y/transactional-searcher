@@ -10,4 +10,5 @@ public class HierarchyVo {
     private int seq;
     private SourceCodeVo sourceCodeVo;
     private boolean isDao;
+    private boolean isRequiredTransactional;
 }
