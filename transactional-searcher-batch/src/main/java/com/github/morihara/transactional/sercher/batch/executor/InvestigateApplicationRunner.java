@@ -29,7 +29,6 @@ public class InvestigateApplicationRunner implements CommandLineRunner {
             }
             investigationService.updateResult(transactionalMethodDto);
         }
-        investigationService.exportCSV(packageNames);
         log.info("----end investigation----");
     }
 

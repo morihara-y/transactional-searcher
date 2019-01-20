@@ -62,12 +62,6 @@ public class InvestigationServiceImpl implements InvestigationService {
         transactionalMethodDao.insert(transactionalMethodDto);
     }
 
-    @Override
-    public void exportCSV(List<String> packageNames) {
-        // TODO Auto-generated method stub
-
-    }
-
     private TransactionalMethodDto makeNewTransactionalMethodDto(SourceCodeVo sourceCodeVo) {
         return TransactionalMethodDto.builder()
                 .transactionalMethodId(UUID.randomUUID())

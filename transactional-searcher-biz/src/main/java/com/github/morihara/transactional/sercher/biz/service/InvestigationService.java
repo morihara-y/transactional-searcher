@@ -13,6 +13,4 @@ public interface InvestigationService {
     boolean isManagedTransactional(TransactionalMethodDto transactionalMethodDto);
 
     void updateResult(TransactionalMethodDto transactionalMethodDto);
-
-    void exportCSV(List<String> packageNames);
 }
