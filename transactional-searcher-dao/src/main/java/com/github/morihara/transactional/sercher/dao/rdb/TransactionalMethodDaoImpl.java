@@ -3,8 +3,8 @@ package com.github.morihara.transactional.sercher.dao.rdb;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
@@ -80,24 +80,29 @@ public class TransactionalMethodDaoImpl implements TransactionalMethodDao {
     }
 
     @Override
-    public List<TransactionalMethodDto> fetchByPackageName(String packageName) {
-        String sql = "select * from transactional_method where package_name = ? "
+    public Optional<TransactionalMethodDto> fetchByMethod(SourceCodeVo sourceCodeVo) {
+        String sql = "select * from transactional_method "
+                + "where package_name = ? "
+                + "and class_name = ? "
+                + "and method_name = ? "
+                + "and method_param = ? "
                 + "order by package_name, class_name, method_name, method_param";
         PreparedStatementSetter pss = new PreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps) throws SQLException {
-                ps.setString(1, packageName);
+                ps.setString(1, sourceCodeVo.getPackageName());
+                ps.setString(2, sourceCodeVo.getClassName());
+                ps.setString(3, sourceCodeVo.getMethodName());
+                ps.setString(4, sourceCodeVo.getMethodParam());
             }
         };
         List<TransactionalMethodDto> dtos = jdbc.query(sql, pss, ROW_MAPPER);
-        return joinRelatedDaoCode(dtos);
-    }
-
-    private List<TransactionalMethodDto> joinRelatedDaoCode(List<TransactionalMethodDto> dtos) {
-        return dtos.stream().map(dto -> {
-            UUID transactionalMethodId = dto.getTransactionMethodId();
-            dto.setRelatedDaoCodes(relatedDaoCodeDao.fetchByRelatedMethodId(transactionalMethodId));
-            return dto;
-        }).collect(Collectors.toList());
+        if (dtos.size() != 1) {
+            return Optional.empty();
+        }
+        TransactionalMethodDto dto = dtos.get(0);
+        UUID transactionalMethodId = dto.getTransactionMethodId();
+        dto.setRelatedDaoCodes(relatedDaoCodeDao.fetchByRelatedMethodId(transactionalMethodId));
+        return Optional.of(dto);
     }
 }

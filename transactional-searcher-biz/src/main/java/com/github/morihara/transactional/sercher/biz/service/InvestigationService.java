@@ -4,7 +4,9 @@ import java.util.List;
 import com.github.morihara.transactional.sercher.dto.TransactionalMethodDto;
 
 public interface InvestigationService {
-    List<TransactionalMethodDto> getTopLayerWithoutTransactional(String sourceFolderPath);
+    List<String> getPackageNames(String sourceFolderPath);
+
+    List<TransactionalMethodDto> getTopLayerWithoutRegistered(List<String> packageNames);
 
     boolean isRDBUpdateService(TransactionalMethodDto transactionalMethodDto);
 
@@ -12,5 +14,5 @@ public interface InvestigationService {
 
     void updateResult(TransactionalMethodDto transactionalMethodDto);
 
-    void exportCSV(String sourceFolderPath);
+    void exportCSV(List<String> packageNames);
 }

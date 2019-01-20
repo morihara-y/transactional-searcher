@@ -17,8 +17,9 @@ public class InvestigateApplicationRunner implements CommandLineRunner {
     public void run(String... arg0) throws Exception {
         log.info("----start investigation----");
         String sourceFolderPath = arg0[0];
+        List<String> packageNames = investigationService.getPackageNames(sourceFolderPath);
         List<TransactionalMethodDto> transactionalMethodDtos =
-                investigationService.getTopLayerWithoutTransactional(sourceFolderPath);
+                investigationService.getTopLayerWithoutRegistered(packageNames);
         for (TransactionalMethodDto transactionalMethodDto : transactionalMethodDtos) {
             if (!investigationService.isRDBUpdateService(transactionalMethodDto)) {
                 continue;
@@ -28,7 +29,7 @@ public class InvestigateApplicationRunner implements CommandLineRunner {
             }
             investigationService.updateResult(transactionalMethodDto);
         }
-        investigationService.exportCSV(sourceFolderPath);
+        investigationService.exportCSV(packageNames);
         log.info("----end investigation----");
     }
 
