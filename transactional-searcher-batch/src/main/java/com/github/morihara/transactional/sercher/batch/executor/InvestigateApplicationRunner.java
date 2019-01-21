@@ -19,12 +19,10 @@ public class InvestigateApplicationRunner implements CommandLineRunner {
         String sourceFolderPath = arg0[0];
         List<String> packageNames = investigationService.getPackageNames(sourceFolderPath);
         List<TransactionalMethodDto> transactionalMethodDtos =
-                investigationService.getTopLayerWithoutRegistered(packageNames);
+                investigationService.getTopLayerWithoutRegistered(sourceFolderPath, packageNames);
         for (TransactionalMethodDto transactionalMethodDto : transactionalMethodDtos) {
-            if (investigationService.isManagedTransactional(transactionalMethodDto)) {
-                continue;
-            }
-            if (!investigationService.isRDBUpdateService(transactionalMethodDto)) {
+            if (investigationService.isManagedTransactional(transactionalMethodDto) 
+                    || !investigationService.isRDBUpdateService(transactionalMethodDto)) {
                 continue;
             }
             investigationService.updateResult(transactionalMethodDto);

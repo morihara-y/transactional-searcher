@@ -30,6 +30,7 @@ public class TransactionalMethodDaoImpl implements TransactionalMethodDao {
                 .line(rs.getInt("line")).build();
         return TransactionalMethodDto.builder()
                 .transactionalMethodId(UUID.fromString(rs.getString("transactional_method_id")))
+                .sourceFolderPath(rs.getString("source_folder_path"))
                 .sourceCodeVo(sourceCodeVo)
                 .isDeveloped(rs.getBoolean("is_developed"))
                 .ticketNo(rs.getInt("ticket_no"))
@@ -41,6 +42,7 @@ public class TransactionalMethodDaoImpl implements TransactionalMethodDao {
         jdbc.update(
                 "insert into transactional_method ("
                         + "transactional_method_id, "
+                        + "source_folder_path, "
                         + "package_name, "
                         + "class_name, "
                         + "method_name, "
@@ -51,6 +53,7 @@ public class TransactionalMethodDaoImpl implements TransactionalMethodDao {
                         + "ticket_no"
                         + ") values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 transactionalMethodDto.getTransactionalMethodId(),
+                transactionalMethodDto.getSourceFolderPath(),
                 transactionalMethodDto.getSourceCodeVo().getPackageName(),
                 transactionalMethodDto.getSourceCodeVo().getClassName(),
                 transactionalMethodDto.getSourceCodeVo().getMethodName(),
@@ -80,20 +83,22 @@ public class TransactionalMethodDaoImpl implements TransactionalMethodDao {
     }
 
     @Override
-    public Optional<TransactionalMethodDto> fetchByMethod(SourceCodeVo sourceCodeVo) {
+    public Optional<TransactionalMethodDto> fetchByMethod(String sourceFolderPath, SourceCodeVo sourceCodeVo) {
         String sql = "select * from transactional_method "
-                + "where package_name = ? "
+                + "where source_folder_path = ? "
+                + "and package_name = ? "
                 + "and class_name = ? "
                 + "and method_name = ? "
                 + "and method_param = ? "
-                + "order by package_name, class_name, method_name, method_param";
+                + "order by source_folder_path, package_name, class_name, method_name, method_param";
         PreparedStatementSetter pss = new PreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps) throws SQLException {
-                ps.setString(1, sourceCodeVo.getPackageName());
-                ps.setString(2, sourceCodeVo.getClassName());
-                ps.setString(3, sourceCodeVo.getMethodName());
-                ps.setString(4, sourceCodeVo.getMethodParam());
+                ps.setString(1, sourceFolderPath);
+                ps.setString(2, sourceCodeVo.getPackageName());
+                ps.setString(3, sourceCodeVo.getClassName());
+                ps.setString(4, sourceCodeVo.getMethodName());
+                ps.setString(5, sourceCodeVo.getMethodParam());
             }
         };
         List<TransactionalMethodDto> dtos = jdbc.query(sql, pss, ROW_MAPPER);

@@ -12,5 +12,5 @@ public interface TransactionalMethodDao {
 
     void delete(UUID transactionalMethodId);
 
-    Optional<TransactionalMethodDto> fetchByMethod(SourceCodeVo sourceCodeVo);
+    Optional<TransactionalMethodDto> fetchByMethod(String sourceFolderPath, SourceCodeVo sourceCodeVo);
 }

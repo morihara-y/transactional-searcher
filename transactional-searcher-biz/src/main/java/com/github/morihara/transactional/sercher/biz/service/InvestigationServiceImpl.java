@@ -26,13 +26,14 @@ public class InvestigationServiceImpl implements InvestigationService {
     }
 
     @Override
-    public List<TransactionalMethodDto> getTopLayerWithoutRegistered(List<String> packageNames) {
+    public List<TransactionalMethodDto> getTopLayerWithoutRegistered(String sourceFolderPath,
+            List<String> packageNames) {
         List<TransactionalMethodDto> results = new ArrayList<>();
         for (String packageName : packageNames) {
             List<SourceCodeVo> topLayerMethods =
                     sourceCodeFetchDao.fetchMethodsByPackageName(packageName);
             results.addAll(topLayerMethods.stream()
-                    .filter(topLayerMethod -> !transactionalMethodDao.fetchByMethod(topLayerMethod)
+                    .filter(topLayerMethod -> !transactionalMethodDao.fetchByMethod(sourceFolderPath, topLayerMethod)
                             .isPresent())
                     .map(this::makeNewTransactionalMethodDto)
                     .collect(Collectors.toList()));

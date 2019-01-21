@@ -10,6 +10,7 @@ import lombok.Data;
 @Data
 public class TransactionalMethodDto {
     private UUID transactionalMethodId;
+    private String sourceFolderPath;
     private SourceCodeVo sourceCodeVo;
     private boolean isDeveloped;
     private int ticketNo;
