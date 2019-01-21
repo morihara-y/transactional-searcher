@@ -45,7 +45,7 @@ public class InvestigationServiceImpl implements InvestigationService {
     public boolean isRDBUpdateService(TransactionalMethodDto transactionalMethodDto) {
         List<RelatedDaoCodeDto> relatedDaoCodes =
                 callHierarchyService.fetchRelatedDaoCodesByCallHierarchy(transactionalMethodDto);
-        if (relatedDaoCodes.size() > 0) {
+        if (!relatedDaoCodes.isEmpty()) {
             transactionalMethodDto.setRelatedDaoCodes(relatedDaoCodes);
             return true;
         }
@@ -54,8 +54,8 @@ public class InvestigationServiceImpl implements InvestigationService {
 
     @Override
     public boolean isManagedTransactional(TransactionalMethodDto transactionalMethodDto) {
-        return sourceCodeFetchDao
-                .hasTransactionalAnnotation(transactionalMethodDto.getSourceCodeVo());
+        return transactionalMethodDto.isDeveloped()
+                || sourceCodeFetchDao.hasTransactionalAnnotation(transactionalMethodDto.getSourceCodeVo());
     }
 
     @Override
