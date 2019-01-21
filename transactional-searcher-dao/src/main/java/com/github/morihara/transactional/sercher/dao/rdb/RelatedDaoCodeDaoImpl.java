@@ -10,7 +10,6 @@ import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Repository;
 import com.github.morihara.transactional.sercher.dto.RelatedDaoCodeDto;
 import com.github.morihara.transactional.sercher.dto.vo.SourceCodeVo;
@@ -28,7 +27,6 @@ public class RelatedDaoCodeDaoImpl implements RelatedDaoCodeDao {
                 .methodName(rs.getString("method_name"))
                 .methodParam(rs.getString("method_param"))
                 .methodType(rs.getString("method_type"))
-                .line(rs.getInt("line"))
                 .build();
         return RelatedDaoCodeDto.builder()
                 .transactionalMethodId(UUID.fromString(rs.getString("transactional_method_id")))
@@ -71,14 +69,20 @@ public class RelatedDaoCodeDaoImpl implements RelatedDaoCodeDao {
                 + "class_name, "
                 + "method_name, "
                 + "method_param, "
-                + "method_type, "
-                + "line"
-                + ") values (?, ?, ?, ?, ?, ?, ?, ?)";
+                + "method_type"
+                + ") values (?, ?, ?, ?, ?, ?, ?)";
         BatchPreparedStatementSetter bpss = new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
                 RelatedDaoCodeDto relatedDaoCodeDto = relatedDaoCodes.get(i); 
-                ps.setString(1, relatedDaoCodeDto.getTransactionalMethodId().toString());
+                int index = 0;
+                ps.setString(index++, relatedDaoCodeDto.getTransactionalMethodId().toString());
+                ps.setInt(index++, relatedDaoCodeDto.getSeq());
+                ps.setString(index++, relatedDaoCodeDto.getRelatedDaoCodeVo().getPackageName());
+                ps.setString(index++, relatedDaoCodeDto.getRelatedDaoCodeVo().getClassName());
+                ps.setString(index++, relatedDaoCodeDto.getRelatedDaoCodeVo().getMethodName());
+                ps.setString(index++, relatedDaoCodeDto.getRelatedDaoCodeVo().getMethodParam());
+                ps.setString(index++, relatedDaoCodeDto.getRelatedDaoCodeVo().getMethodType());
             }            
             @Override
             public int getBatchSize() {

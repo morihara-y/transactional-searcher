@@ -11,5 +11,4 @@ public class SourceCodeVo {
     private String methodName;
     private String methodParam;
     private String methodType;
-    private int line;
 }

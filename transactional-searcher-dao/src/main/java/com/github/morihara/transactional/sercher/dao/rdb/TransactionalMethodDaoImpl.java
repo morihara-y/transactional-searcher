@@ -2,11 +2,9 @@ package com.github.morihara.transactional.sercher.dao.rdb;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -32,7 +30,7 @@ public class TransactionalMethodDaoImpl implements TransactionalMethodDao {
                 .methodName(rs.getString("method_name"))
                 .methodParam(rs.getString("method_param"))
                 .methodType(rs.getString("method_type"))
-                .line(rs.getInt("line")).build();
+                .build();
         return TransactionalMethodDto.builder()
                 .transactionalMethodId(UUID.fromString(rs.getString("transactional_method_id")))
                 .sourceFolderPath(rs.getString("source_folder_path"))
@@ -52,7 +50,6 @@ public class TransactionalMethodDaoImpl implements TransactionalMethodDao {
                 + "method_name, "
                 + "method_param, "
                 + "method_type, "
-                + "line, "
                 + "is_developed, "
                 + "ticket_no"
                 + ") values (?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -68,7 +65,6 @@ public class TransactionalMethodDaoImpl implements TransactionalMethodDao {
                 ps.setString(index++, transactionalMethodDto.getSourceCodeVo().getMethodName());
                 ps.setString(index++, transactionalMethodDto.getSourceCodeVo().getMethodParam());
                 ps.setString(index++, transactionalMethodDto.getSourceCodeVo().getMethodType());
-                ps.setInt(index++, transactionalMethodDto.getSourceCodeVo().getLine());
                 ps.setBoolean(index++, transactionalMethodDto.isDeveloped());
                 ps.setInt(index++, transactionalMethodDto.getTicketNo());
             }
