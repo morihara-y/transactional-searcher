@@ -5,7 +5,7 @@ import java.util.UUID;
 import com.github.morihara.transactional.sercher.dto.RelatedDaoCodeDto;
 
 public interface RelatedDaoCodeDao {
-    void upsert(UUID transactionalMethodId, List<RelatedDaoCodeDto> relatedDaoCodes);
+    void batchUpsert(List<UUID> transactionalMethodIds, List<RelatedDaoCodeDto> relatedDaoCodes);
 
     List<RelatedDaoCodeDto> fetchByRelatedMethodId(UUID transactionalMethodId);
 }

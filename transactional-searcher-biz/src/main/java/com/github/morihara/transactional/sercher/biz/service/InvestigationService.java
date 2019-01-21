@@ -12,5 +12,5 @@ public interface InvestigationService {
 
     boolean isManagedTransactional(TransactionalMethodDto transactionalMethodDto);
 
-    void updateResult(TransactionalMethodDto transactionalMethodDto);
+    void updateResult(List<TransactionalMethodDto> transactionalMethodDtos);
 }

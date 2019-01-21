@@ -2,12 +2,15 @@ package com.github.morihara.transactional.sercher.dao.rdb;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Repository;
 import com.github.morihara.transactional.sercher.dto.RelatedDaoCodeDto;
 import com.github.morihara.transactional.sercher.dto.vo.SourceCodeVo;
@@ -35,8 +38,8 @@ public class RelatedDaoCodeDaoImpl implements RelatedDaoCodeDao {
     };
 
     @Override
-    public void upsert(UUID transactionalMethodId, List<RelatedDaoCodeDto> relatedDaoCodes) {
-        delete(transactionalMethodId);
+    public void batchUpsert(List<UUID> transactionalMethodIds, List<RelatedDaoCodeDto> relatedDaoCodes) {
+        delete(transactionalMethodIds);
         batchInsert(relatedDaoCodes);
     }
 
@@ -53,9 +56,10 @@ public class RelatedDaoCodeDaoImpl implements RelatedDaoCodeDao {
         return jdbc.query(sql, pss, ROW_MAPPER);
     }
 
-    private void delete(UUID transactionalMethodId) {
-        jdbc.update("delete from related_dao_code where transactional_method_id = ?",
-                transactionalMethodId);
+    private void delete(List<UUID> transactionalMethodIds) {
+        final String sql = "delete from related_dao_code where transactional_method_id in (:ids)";
+        Map<String, List<UUID>> idsParameters = Collections.singletonMap("ids", transactionalMethodIds);
+        jdbc.update(sql, idsParameters);
     }
 
     private void batchInsert(List<RelatedDaoCodeDto> relatedDaoCodes) {

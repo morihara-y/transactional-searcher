@@ -6,6 +6,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import com.github.morihara.transactional.sercher.biz.source.search.service.CallHierarchyService;
+import com.github.morihara.transactional.sercher.dao.rdb.RelatedDaoCodeDao;
 import com.github.morihara.transactional.sercher.dao.rdb.TransactionalMethodDao;
 import com.github.morihara.transactional.sercher.dao.spoon.SourceCodeFetchDao;
 import com.github.morihara.transactional.sercher.dto.RelatedDaoCodeDto;
@@ -17,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class InvestigationServiceImpl implements InvestigationService {
     private final TransactionalMethodDao transactionalMethodDao;
+    private final RelatedDaoCodeDao relatedDaoCodeDao;
     private final SourceCodeFetchDao sourceCodeFetchDao;
     private final CallHierarchyService callHierarchyService;
     
@@ -59,8 +61,15 @@ public class InvestigationServiceImpl implements InvestigationService {
     }
 
     @Override
-    public void updateResult(TransactionalMethodDto transactionalMethodDto) {
-        transactionalMethodDao.insert(transactionalMethodDto);
+    public void updateResult(List<TransactionalMethodDto> transactionalMethodDtos) {
+        transactionalMethodDao.batchInsert(transactionalMethodDtos);
+        List<UUID> transactionalMethodIds = new ArrayList<>();
+        List<RelatedDaoCodeDto> relatedDaoCodes = new ArrayList<>();
+        for (TransactionalMethodDto transactionalMethodDto : transactionalMethodDtos) {
+            transactionalMethodIds.add(transactionalMethodDto.getTransactionalMethodId());
+            relatedDaoCodes.addAll(transactionalMethodDto.getRelatedDaoCodes());
+        }
+        relatedDaoCodeDao.batchUpsert(transactionalMethodIds, relatedDaoCodes);
     }
 
     private TransactionalMethodDto makeNewTransactionalMethodDto(SourceCodeVo sourceCodeVo) {
