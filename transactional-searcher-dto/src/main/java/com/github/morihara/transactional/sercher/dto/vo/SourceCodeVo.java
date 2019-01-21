@@ -11,4 +11,15 @@ public class SourceCodeVo {
     private String methodName;
     private String methodParam;
     private String methodType;
+
+    public String toUniqueMethodStr() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(this.className);
+        sb.append(".");
+        sb.append(this.methodName);
+        sb.append("(");
+        sb.append(this.methodParam);
+        sb.append(")");
+        return sb.toString();
+    }
 }
