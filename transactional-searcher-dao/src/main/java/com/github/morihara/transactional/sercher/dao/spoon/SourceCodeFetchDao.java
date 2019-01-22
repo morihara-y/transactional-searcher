@@ -6,7 +6,7 @@ import com.github.morihara.transactional.sercher.dto.vo.SourceCodeVo;
 public interface SourceCodeFetchDao {
     List<String> fetchPackagesBySourceFolderPath(String sourceFolderPath);
 
-    List<SourceCodeVo> fetchMethodsByPackageName(String packageName);
+    List<SourceCodeVo> fetchMethodsByPackageName(String sourceFolderPath, String packageName);
 
     boolean hasUpdateSql(SourceCodeVo sourceCodeVo);
 

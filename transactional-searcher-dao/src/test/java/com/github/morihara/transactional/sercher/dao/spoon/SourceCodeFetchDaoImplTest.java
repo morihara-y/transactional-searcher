@@ -6,12 +6,19 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.github.morihara.transactional.sercher.dto.vo.SourceCodeVo;
+
 @RunWith(MockitoJUnitRunner.class)
 public class SourceCodeFetchDaoImplTest {
     @Test
     public void test() {
+        String sourceFolderPath = "src/main/java";
         SourceCodeFetchDao dao = new SourceCodeFetchDaoImpl();
-        List<String> result = dao.fetchPackagesBySourceFolderPath("/home/morihara_y/HUE/WorkSpace/Eclipse47/transactional-searcher/transactional-searcher-dao/src/main/java");
-        System.out.println(result);
+        List<String> result1 = dao.fetchPackagesBySourceFolderPath(sourceFolderPath);
+        System.out.println(result1);
+        List<SourceCodeVo> result2 = dao.fetchMethodsByPackageName(sourceFolderPath, result1.get(1));
+        for (SourceCodeVo vo : result2) {
+            System.out.println(vo.toUniqueMethodStr());
+        }
     }
 }

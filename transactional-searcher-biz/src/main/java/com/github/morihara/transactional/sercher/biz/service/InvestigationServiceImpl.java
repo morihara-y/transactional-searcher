@@ -33,7 +33,7 @@ public class InvestigationServiceImpl implements InvestigationService {
         List<TransactionalMethodDto> results = new ArrayList<>();
         for (String packageName : packageNames) {
             List<SourceCodeVo> topLayerMethods =
-                    sourceCodeFetchDao.fetchMethodsByPackageName(packageName);
+                    sourceCodeFetchDao.fetchMethodsByPackageName(sourceFolderPath, packageName);
             results.addAll(topLayerMethods.stream()
                     .filter(topLayerMethod -> !transactionalMethodDao.fetchByMethod(sourceFolderPath, topLayerMethod)
                             .isPresent())

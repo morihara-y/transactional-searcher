@@ -1,37 +1,35 @@
 package com.github.morihara.transactional.sercher.dao.spoon;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import com.github.morihara.transactional.sercher.dto.vo.SourceCodeVo;
 import spoon.processing.AbstractProcessor;
-import spoon.reflect.code.CtInvocation;
+import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtElement;
-import spoon.reflect.reference.CtExecutableReference;
+import spoon.reflect.declaration.CtMethod;
+import spoon.reflect.declaration.CtParameter;
 import spoon.support.QueueProcessingManager;
 
-public class FetchMethodsProcesser extends AbstractProcessor<CtInvocation<CtElement>> {
+public class FetchMethodsProcesser extends AbstractProcessor<CtClass<CtElement>> {
     private String packageName;
     private final Set<SourceCodeVo> sourceCodeVoSet = new HashSet<>();
-    private final Set<String> methodStrs = new HashSet<>();
 
     @Override
-    public void process(CtInvocation<CtElement> element) {
-        CtExecutableReference<CtElement> executable = element.getExecutable();
-        if (Objects.isNull(executable)) {
+    public void process(CtClass<CtElement> element) {
+        if (element.isAnonymous()) {
             return;
         }
-        Method actualMethod = executable.getActualMethod();
-        SourceCodeVo sourceCodeVo = makeSourceCodeVo(actualMethod);
-        String sourceCodeStr = sourceCodeVo.toUniqueMethodStr();
-        if (methodStrs.contains(sourceCodeStr)) {
-            return;
+        Set<CtMethod<?>> methods = element.getMethods();
+        String className = element.getQualifiedName();
+        for (CtMethod<?> method : methods) {
+            if (method.isPrivate()) {
+                continue;
+            }
+            SourceCodeVo sourceCodeVo = makeSourceCodeVo(className, method);
+            sourceCodeVoSet.add(sourceCodeVo);
         }
-        sourceCodeVoSet.add(sourceCodeVo);
-        methodStrs.add(sourceCodeStr);
     }
 
     List<SourceCodeVo> executeSpoon(QueueProcessingManager queueProcessingManager,
@@ -42,22 +40,22 @@ public class FetchMethodsProcesser extends AbstractProcessor<CtInvocation<CtElem
         return new ArrayList<>(sourceCodeVoSet);
     }
 
-    private SourceCodeVo makeSourceCodeVo(Method method) {
+    private SourceCodeVo makeSourceCodeVo(String className, CtMethod<?> method) {
         return SourceCodeVo.builder()
                 .packageName(packageName)
-                .className(method.getClass().getName())
-                .methodName(method.getName())
+                .className(className)
+                .methodName(method.getSimpleName())
                 .methodParam(makeParamStr(method))
-                .methodType(method.getReturnType().getName())
+                .methodType(method.getType().getQualifiedName())
                 .build();
     }
 
-    private String makeParamStr(Method method) {
-        Class<?>[] classes = method.getParameterTypes();
+    private String makeParamStr(CtMethod<?> method) {
+        List<CtParameter<?>> params = method.getParameters();
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < classes.length; i++) {
-            sb.append(classes[i].getName());
-            if (i < classes.length - 1) {
+        for (int i = 0; i < params.size(); i++) {
+            sb.append(params.get(i).getType().getQualifiedName());
+            if (i < params.size() - 1) {
                 sb.append(", ");
             }
         }

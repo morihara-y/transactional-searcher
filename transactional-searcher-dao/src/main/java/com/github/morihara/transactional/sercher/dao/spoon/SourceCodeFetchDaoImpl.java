@@ -22,9 +22,14 @@ public class SourceCodeFetchDaoImpl implements SourceCodeFetchDao {
     }
 
     @Override
-    public List<SourceCodeVo> fetchMethodsByPackageName(String packageName) {
-        // TODO Auto-generated method stub
-        return null;
+    public List<SourceCodeVo> fetchMethodsByPackageName(String sourceFolderPath, String packageName) {
+        String packageNamePath = makePackagePath(sourceFolderPath, packageName);
+        Launcher launcher = new Launcher();
+        launcher.setArgs(new String[] {"--output-type", "nooutput"});
+        launcher.addInputResource(new FileSystemFolder(new File(packageNamePath)));
+        launcher.run();
+        QueueProcessingManager queueProcessingManager = new QueueProcessingManager(launcher.getFactory());
+        return new FetchMethodsProcesser().executeSpoon(queueProcessingManager, packageName);
     }
 
     @Override
@@ -39,4 +44,11 @@ public class SourceCodeFetchDaoImpl implements SourceCodeFetchDao {
         return false;
     }
 
+    private String makePackagePath(String sourceFolderPath, String packageName) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(sourceFolderPath);
+        sb.append("/");
+        sb.append(packageName.replaceAll("\\.", "/"));
+        return sb.toString();
+    }
 }
