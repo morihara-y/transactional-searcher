@@ -31,6 +31,7 @@ public class FetchMethodsProcesser extends AbstractProcessor<CtInvocation<CtElem
             return;
         }
         sourceCodeVoSet.add(sourceCodeVo);
+        methodStrs.add(sourceCodeStr);
     }
 
     List<SourceCodeVo> executeSpoon(QueueProcessingManager queueProcessingManager,
