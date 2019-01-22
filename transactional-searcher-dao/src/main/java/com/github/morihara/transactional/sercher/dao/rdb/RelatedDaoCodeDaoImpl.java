@@ -76,13 +76,13 @@ public class RelatedDaoCodeDaoImpl implements RelatedDaoCodeDao {
             public void setValues(PreparedStatement ps, int i) throws SQLException {
                 RelatedDaoCodeDto relatedDaoCodeDto = relatedDaoCodes.get(i); 
                 int index = 0;
-                ps.setString(index++, relatedDaoCodeDto.getTransactionalMethodId().toString());
-                ps.setInt(index++, relatedDaoCodeDto.getSeq());
-                ps.setString(index++, relatedDaoCodeDto.getRelatedDaoCodeVo().getPackageName());
-                ps.setString(index++, relatedDaoCodeDto.getRelatedDaoCodeVo().getClassName());
-                ps.setString(index++, relatedDaoCodeDto.getRelatedDaoCodeVo().getMethodName());
-                ps.setString(index++, relatedDaoCodeDto.getRelatedDaoCodeVo().getMethodParam());
-                ps.setString(index++, relatedDaoCodeDto.getRelatedDaoCodeVo().getMethodType());
+                ps.setString(++index, relatedDaoCodeDto.getTransactionalMethodId().toString());
+                ps.setInt(++index, relatedDaoCodeDto.getSeq());
+                ps.setString(++index, relatedDaoCodeDto.getRelatedDaoCodeVo().getPackageName());
+                ps.setString(++index, relatedDaoCodeDto.getRelatedDaoCodeVo().getClassName());
+                ps.setString(++index, relatedDaoCodeDto.getRelatedDaoCodeVo().getMethodName());
+                ps.setString(++index, relatedDaoCodeDto.getRelatedDaoCodeVo().getMethodParam());
+                ps.setString(++index, relatedDaoCodeDto.getRelatedDaoCodeVo().getMethodType());
             }            
             @Override
             public int getBatchSize() {

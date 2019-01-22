@@ -58,15 +58,15 @@ public class TransactionalMethodDaoImpl implements TransactionalMethodDao {
             public void setValues(PreparedStatement ps, int i) throws SQLException {
                 TransactionalMethodDto transactionalMethodDto = transactionalMethodDtos.get(i);
                 int index = 0;
-                ps.setString(index++, transactionalMethodDto.getTransactionalMethodId().toString());
-                ps.setString(index++, transactionalMethodDto.getSourceFolderPath());
-                ps.setString(index++, transactionalMethodDto.getSourceCodeVo().getPackageName());
-                ps.setString(index++, transactionalMethodDto.getSourceCodeVo().getClassName());
-                ps.setString(index++, transactionalMethodDto.getSourceCodeVo().getMethodName());
-                ps.setString(index++, transactionalMethodDto.getSourceCodeVo().getMethodParam());
-                ps.setString(index++, transactionalMethodDto.getSourceCodeVo().getMethodType());
-                ps.setBoolean(index++, transactionalMethodDto.isDeveloped());
-                ps.setInt(index++, transactionalMethodDto.getTicketNo());
+                ps.setString(++index, transactionalMethodDto.getTransactionalMethodId().toString());
+                ps.setString(++index, transactionalMethodDto.getSourceFolderPath());
+                ps.setString(++index, transactionalMethodDto.getSourceCodeVo().getPackageName());
+                ps.setString(++index, transactionalMethodDto.getSourceCodeVo().getClassName());
+                ps.setString(++index, transactionalMethodDto.getSourceCodeVo().getMethodName());
+                ps.setString(++index, transactionalMethodDto.getSourceCodeVo().getMethodParam());
+                ps.setString(++index, transactionalMethodDto.getSourceCodeVo().getMethodType());
+                ps.setBoolean(++index, transactionalMethodDto.isDeveloped());
+                ps.setInt(++index, transactionalMethodDto.getTicketNo());
             }
             @Override
             public int getBatchSize() {
