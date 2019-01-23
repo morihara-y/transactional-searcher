@@ -8,7 +8,7 @@ public interface SourceCodeFetchDao {
 
     List<SourceCodeVo> fetchMethodsByPackageName(String sourceFolderPath, String packageName);
 
-    boolean hasUpdateSql(SourceCodeVo sourceCodeVo);
+    boolean hasUpdateSql(String sourceFolderPath, SourceCodeVo sourceCodeVo);
 
     boolean hasTransactionalAnnotation(SourceCodeVo sourceCodeVo);
 }

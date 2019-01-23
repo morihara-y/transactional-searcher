@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import com.github.morihara.transactional.sercher.dto.vo.SourceCodeVo;
+
+import lombok.RequiredArgsConstructor;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtElement;
@@ -12,8 +14,9 @@ import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtParameter;
 import spoon.support.QueueProcessingManager;
 
+@RequiredArgsConstructor
 public class FetchMethodsProcesser extends AbstractProcessor<CtClass<CtElement>> {
-    private String packageName;
+    private final String packageName;
     private final Set<SourceCodeVo> sourceCodeVoSet = new HashSet<>();
 
     @Override
@@ -22,7 +25,7 @@ public class FetchMethodsProcesser extends AbstractProcessor<CtClass<CtElement>>
             return;
         }
         Set<CtMethod<?>> methods = element.getMethods();
-        String className = element.getQualifiedName();
+        String className = element.getSimpleName();
         for (CtMethod<?> method : methods) {
             if (method.isPrivate()) {
                 continue;
@@ -32,9 +35,7 @@ public class FetchMethodsProcesser extends AbstractProcessor<CtClass<CtElement>>
         }
     }
 
-    List<SourceCodeVo> executeSpoon(QueueProcessingManager queueProcessingManager,
-            String packageName) {
-        this.packageName = packageName;
+    List<SourceCodeVo> executeSpoon(QueueProcessingManager queueProcessingManager) {
         queueProcessingManager.addProcessor(this);
         queueProcessingManager.process(queueProcessingManager.getFactory().Class().getAll());
         return new ArrayList<>(sourceCodeVoSet);

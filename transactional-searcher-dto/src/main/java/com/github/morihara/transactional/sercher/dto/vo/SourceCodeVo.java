@@ -14,6 +14,8 @@ public class SourceCodeVo {
 
     public String toUniqueMethodStr() {
         StringBuilder sb = new StringBuilder();
+        sb.append(this.packageName);
+        sb.append(".");
         sb.append(this.className);
         sb.append(".");
         sb.append(this.methodName);
