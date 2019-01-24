@@ -12,6 +12,8 @@ import com.github.morihara.transactional.sercher.dao.spoon.SourceCodeFetchDao;
 import com.github.morihara.transactional.sercher.dto.RelatedDaoCodeDto;
 import com.github.morihara.transactional.sercher.dto.TransactionalMethodDto;
 import com.github.morihara.transactional.sercher.dto.vo.SourceCodeVo;
+import com.github.morihara.transactional.sercher.enumerate.DevelopStatusEnum;
+
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -56,7 +58,8 @@ public class InvestigationServiceImpl implements InvestigationService {
 
     @Override
     public boolean isManagedTransactional(TransactionalMethodDto transactionalMethodDto) {
-        return transactionalMethodDto.isDeveloped()
+        return transactionalMethodDto.getDevelopStatus() == DevelopStatusEnum.DEVELOPED
+                || transactionalMethodDto.getDevelopStatus() == DevelopStatusEnum.IS_NOT_REQUIRED
                 || sourceCodeFetchDao.hasTransactionalAnnotation(transactionalMethodDto.getSourceCodeVo());
     }
 
@@ -76,7 +79,7 @@ public class InvestigationServiceImpl implements InvestigationService {
         return TransactionalMethodDto.builder()
                 .transactionalMethodId(UUID.randomUUID())
                 .sourceCodeVo(sourceCodeVo)
-                .isDeveloped(false)
+                .developStatus(DevelopStatusEnum.IS_REQUIRED)
                 .build();
     }
 }

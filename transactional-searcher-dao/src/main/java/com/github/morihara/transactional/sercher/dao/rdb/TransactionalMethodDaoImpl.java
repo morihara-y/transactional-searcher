@@ -14,6 +14,8 @@ import org.springframework.stereotype.Repository;
 
 import com.github.morihara.transactional.sercher.dto.TransactionalMethodDto;
 import com.github.morihara.transactional.sercher.dto.vo.SourceCodeVo;
+import com.github.morihara.transactional.sercher.enumerate.DevelopStatusEnum;
+
 import lombok.RequiredArgsConstructor;
 
 @Repository
@@ -35,7 +37,7 @@ public class TransactionalMethodDaoImpl implements TransactionalMethodDao {
                 .transactionalMethodId(UUID.fromString(rs.getString("transactional_method_id")))
                 .sourceFolderPath(rs.getString("source_folder_path"))
                 .sourceCodeVo(sourceCodeVo)
-                .isDeveloped(rs.getBoolean("is_developed"))
+                .developStatus(DevelopStatusEnum.getEnum(rs.getString("develop_status")))
                 .ticketNo(rs.getInt("ticket_no"))
                 .build();
     };
@@ -50,7 +52,7 @@ public class TransactionalMethodDaoImpl implements TransactionalMethodDao {
                 + "method_name, "
                 + "method_param, "
                 + "method_type, "
-                + "is_developed, "
+                + "develop_status, "
                 + "ticket_no"
                 + ") values (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         BatchPreparedStatementSetter pss = new BatchPreparedStatementSetter() {
@@ -65,7 +67,7 @@ public class TransactionalMethodDaoImpl implements TransactionalMethodDao {
                 ps.setString(++index, transactionalMethodDto.getSourceCodeVo().getMethodName());
                 ps.setString(++index, transactionalMethodDto.getSourceCodeVo().getMethodParam());
                 ps.setString(++index, transactionalMethodDto.getSourceCodeVo().getMethodType());
-                ps.setBoolean(++index, transactionalMethodDto.isDeveloped());
+                ps.setString(++index, transactionalMethodDto.getDevelopStatus().getText());
                 ps.setInt(++index, transactionalMethodDto.getTicketNo());
             }
             @Override
@@ -79,9 +81,9 @@ public class TransactionalMethodDaoImpl implements TransactionalMethodDao {
     @Override
     public void updateDevelopStatus(TransactionalMethodDto transactionalMethodDto) {
         jdbc.update(
-                "update transactional_method set is_developed = ?, ticket_no = ?"
+                "update transactional_method set develop_status = ?, ticket_no = ?"
                         + " where transactional_method_id = ?",
-                transactionalMethodDto.isDeveloped(),
+                transactionalMethodDto.getDevelopStatus().getText(),
                 transactionalMethodDto.getTicketNo(),
                 transactionalMethodDto.getTransactionalMethodId());
     }
