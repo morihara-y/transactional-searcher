@@ -43,9 +43,13 @@ public class SourceCodeFetchDaoImpl implements SourceCodeFetchDao {
     }
 
     @Override
-    public boolean hasAnnotation(SourceCodeVo sourceCodeVo) {
-        // TODO Auto-generated method stub
-        return false;
+    public boolean hasAnnotation(String sourceFolderPath, SourceCodeVo sourceCodeVo, Class<?> annotationType) {
+        String classPath = makeClassPath(sourceFolderPath, sourceCodeVo);
+        Launcher launcher = makeLauncherWithCommonArgs();
+        launcher.addInputResource(new FileSystemFile(new File(classPath)));
+        launcher.run();
+        QueueProcessingManager queueProcessingManager = new QueueProcessingManager(launcher.getFactory());
+        return new ConfirmTargetAnnotationProcesser(sourceCodeVo, annotationType).executeSpoon(queueProcessingManager);
     }
 
     private String makePackagePath(String sourceFolderPath, String packageName) {

@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.github.morihara.transactional.sercher.biz.source.search.service.CallHierarchyService;
 import com.github.morihara.transactional.sercher.dao.rdb.RelatedDaoCodeDao;
 import com.github.morihara.transactional.sercher.dao.rdb.TransactionalMethodDao;
@@ -60,7 +62,8 @@ public class InvestigationServiceImpl implements InvestigationService {
     public boolean isManagedTransactional(TransactionalMethodDto transactionalMethodDto) {
         return transactionalMethodDto.getDevelopStatus() == DevelopStatusEnum.DEVELOPED
                 || transactionalMethodDto.getDevelopStatus() == DevelopStatusEnum.IS_NOT_REQUIRED
-                || sourceCodeFetchDao.hasAnnotation(transactionalMethodDto.getSourceCodeVo());
+                || sourceCodeFetchDao.hasAnnotation(transactionalMethodDto.getSourceFolderPath(),
+                        transactionalMethodDto.getSourceCodeVo(), Transactional.class);
     }
 
     @Override

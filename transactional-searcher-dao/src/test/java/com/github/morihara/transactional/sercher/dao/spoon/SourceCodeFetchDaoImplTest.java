@@ -27,6 +27,8 @@ public class SourceCodeFetchDaoImplTest {
         }
         int result3 = dao.hasMethod(sourceFolderPath, makeTransactionalMethodDaoSourceCode(), JDBC_BATCH_UPDATE);
         System.out.println(result3);
+        boolean result4 = dao.hasAnnotation(sourceFolderPath, makeTransactionalMethodDaoSourceCode(), Override.class);
+        System.out.println(result4);
     }
 
     private SourceCodeVo makeTransactionalMethodDaoSourceCode() {

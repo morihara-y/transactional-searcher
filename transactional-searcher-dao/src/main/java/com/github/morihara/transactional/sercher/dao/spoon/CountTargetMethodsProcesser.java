@@ -4,8 +4,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Objects;
 
-import org.apache.commons.lang3.StringUtils;
-
+import com.github.morihara.transactional.sercher.dao.util.MethodsUtil;
 import com.github.morihara.transactional.sercher.dto.vo.SourceCodeVo;
 
 import lombok.RequiredArgsConstructor;
@@ -15,7 +14,6 @@ import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.reference.CtExecutableReference;
-import spoon.reflect.reference.CtTypeReference;
 import spoon.reflect.visitor.filter.AbstractFilter;
 import spoon.support.QueueProcessingManager;
 
@@ -27,7 +25,7 @@ public class CountTargetMethodsProcesser extends AbstractProcessor<CtClass<CtEle
 
     @Override
     public void process(CtClass<CtElement> element) {
-        CtMethod<?> method = fetchTargetMethod(element);
+        CtMethod<?> method = MethodsUtil.fetchTargetMethod(element, this.sourceCodeVo, getFactory());
         if (Objects.isNull(method)) {
             return;
         }
@@ -39,20 +37,6 @@ public class CountTargetMethodsProcesser extends AbstractProcessor<CtClass<CtEle
         queueProcessingManager.addProcessor(this);
         queueProcessingManager.process(queueProcessingManager.getFactory().Class().getAll());
         return this.resultCnt;
-    }
-
-    private CtMethod<?> fetchTargetMethod(CtClass<CtElement> element) {
-        String methodParamStr = sourceCodeVo.getMethodParam();
-        if (StringUtils.isEmpty(methodParamStr)) {
-            return element.getMethod(this.sourceCodeVo.getMethodName());
-        }
-        String[] methodTypeStrs = sourceCodeVo.getMethodParam().split(", ");
-        int typeCnt = methodTypeStrs.length;
-        CtTypeReference<?>[] methodTypes = new CtTypeReference<?>[typeCnt];
-        for (int i = 0; i < typeCnt; i++) {
-            methodTypes[i] = getFactory().Type().createReference(methodTypeStrs[i]);
-        }
-        return element.getMethod(this.sourceCodeVo.getMethodName(), methodTypes);
     }
 
     @SuppressWarnings("rawtypes")

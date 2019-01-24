@@ -4,6 +4,16 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
+import com.github.morihara.transactional.sercher.dto.vo.SourceCodeVo;
+
+import spoon.reflect.declaration.CtClass;
+import spoon.reflect.declaration.CtElement;
+import spoon.reflect.declaration.CtMethod;
+import spoon.reflect.factory.Factory;
+import spoon.reflect.reference.CtTypeReference;
+
 public class MethodsUtil {
     private MethodsUtil() {
     }
@@ -21,5 +31,19 @@ public class MethodsUtil {
         } catch (SecurityException e) {
             throw new ExceptionInInitializerError(e);
         }
+    }
+
+    public static CtMethod<?> fetchTargetMethod(CtClass<CtElement> element, SourceCodeVo sourceCodeVo, Factory factory) {
+        String methodParamStr = sourceCodeVo.getMethodParam();
+        if (StringUtils.isEmpty(methodParamStr)) {
+            return element.getMethod(sourceCodeVo.getMethodName());
+        }
+        String[] methodTypeStrs = sourceCodeVo.getMethodParam().split(", ");
+        int typeCnt = methodTypeStrs.length;
+        CtTypeReference<?>[] methodTypes = new CtTypeReference<?>[typeCnt];
+        for (int i = 0; i < typeCnt; i++) {
+            methodTypes[i] = factory.Type().createReference(methodTypeStrs[i]);
+        }
+        return element.getMethod(sourceCodeVo.getMethodName(), methodTypes);
     }
 }

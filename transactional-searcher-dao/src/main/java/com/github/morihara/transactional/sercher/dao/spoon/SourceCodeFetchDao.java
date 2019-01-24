@@ -11,5 +11,5 @@ public interface SourceCodeFetchDao {
 
     int hasMethod(String sourceFolderPath, SourceCodeVo sourceCodeVo, Method[] methods);
 
-    boolean hasAnnotation(SourceCodeVo sourceCodeVo);
+    boolean hasAnnotation(String sourceFolderPath, SourceCodeVo sourceCodeVo, Class<?> annotationType);
 }
