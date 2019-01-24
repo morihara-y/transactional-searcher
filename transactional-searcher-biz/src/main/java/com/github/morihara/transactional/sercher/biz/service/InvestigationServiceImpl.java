@@ -60,7 +60,7 @@ public class InvestigationServiceImpl implements InvestigationService {
     public boolean isManagedTransactional(TransactionalMethodDto transactionalMethodDto) {
         return transactionalMethodDto.getDevelopStatus() == DevelopStatusEnum.DEVELOPED
                 || transactionalMethodDto.getDevelopStatus() == DevelopStatusEnum.IS_NOT_REQUIRED
-                || sourceCodeFetchDao.hasTransactionalAnnotation(transactionalMethodDto.getSourceCodeVo());
+                || sourceCodeFetchDao.hasAnnotation(transactionalMethodDto.getSourceCodeVo());
     }
 
     @Override

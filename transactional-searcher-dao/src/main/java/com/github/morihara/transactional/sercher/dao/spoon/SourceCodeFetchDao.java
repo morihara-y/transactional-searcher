@@ -1,5 +1,6 @@
 package com.github.morihara.transactional.sercher.dao.spoon;
 
+import java.lang.reflect.Method;
 import java.util.List;
 import com.github.morihara.transactional.sercher.dto.vo.SourceCodeVo;
 
@@ -8,7 +9,7 @@ public interface SourceCodeFetchDao {
 
     List<SourceCodeVo> fetchMethodsByPackageName(String sourceFolderPath, String packageName);
 
-    boolean hasUpdateSql(String sourceFolderPath, SourceCodeVo sourceCodeVo);
+    int hasMethod(String sourceFolderPath, SourceCodeVo sourceCodeVo, Method[] methods);
 
-    boolean hasTransactionalAnnotation(SourceCodeVo sourceCodeVo);
+    boolean hasAnnotation(SourceCodeVo sourceCodeVo);
 }

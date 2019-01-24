@@ -5,9 +5,7 @@ import java.util.List;
 import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.jdbc.core.JdbcTemplate;
 
-import com.github.morihara.transactional.sercher.dao.util.MethodsUtil;
 import com.github.morihara.transactional.sercher.dto.vo.SourceCodeVo;
 
 import lombok.RequiredArgsConstructor;
@@ -22,30 +20,25 @@ import spoon.reflect.visitor.filter.AbstractFilter;
 import spoon.support.QueueProcessingManager;
 
 @RequiredArgsConstructor
-public class ConfirmUpdateMethodsProcesser extends AbstractProcessor<CtClass<CtElement>> {
+public class CountTargetMethodsProcesser extends AbstractProcessor<CtClass<CtElement>> {
     private final SourceCodeVo sourceCodeVo;
-    private boolean result;
-
-    private static final Method[] JDBC_UPDATE = MethodsUtil.getDeclaredMethods(JdbcTemplate.class, "update");
-    private static final Method[] JDBC_BATCH_UPDATE = MethodsUtil.getDeclaredMethods(JdbcTemplate.class, "batchUpdate");
+    private final Method[] fetchingMethods;
+    private int resultCnt;
 
     @Override
     public void process(CtClass<CtElement> element) {
-        if (result) {
-            return;
-        }
         CtMethod<?> method = fetchTargetMethod(element);
         if (Objects.isNull(method)) {
             return;
         }
-        result = hasUpdateSql(method);
+        resultCnt = resultCnt + countFetchingMethods(method);
     }
 
-    boolean executeSpoon(QueueProcessingManager queueProcessingManager) {
-        this.result = false;
+    int executeSpoon(QueueProcessingManager queueProcessingManager) {
+        this.resultCnt = 0;
         queueProcessingManager.addProcessor(this);
         queueProcessingManager.process(queueProcessingManager.getFactory().Class().getAll());
-        return this.result;
+        return this.resultCnt;
     }
 
     private CtMethod<?> fetchTargetMethod(CtClass<CtElement> element) {
@@ -63,7 +56,8 @@ public class ConfirmUpdateMethodsProcesser extends AbstractProcessor<CtClass<CtE
     }
 
     @SuppressWarnings("rawtypes")
-    private boolean hasUpdateSql(CtMethod<?> method) {
+    private int countFetchingMethods(CtMethod<?> method) {
+        int resultCnt = 0;
         List<CtElement> elements = method.getElements(new AbstractFilter<CtElement>(CtElement.class) {
             @Override
             public boolean matches(CtElement element) {
@@ -75,20 +69,16 @@ public class ConfirmUpdateMethodsProcesser extends AbstractProcessor<CtClass<CtE
             CtExecutableReference<?> executableMethod = invocation.getExecutable();
             if (executableMethod != null) {
                 Method actualMethod = executableMethod.getActualMethod();
-                if (actualMethod != null && hasUpdateMethod(actualMethod)) {
-                    return true;
+                if (actualMethod != null && hasMethod(actualMethod)) {
+                    resultCnt++;
                 }
             }
         }
-        return false;
+        return resultCnt;
     }
 
-    private boolean hasUpdateMethod(Method actualMethod) {
-        return hasMethod(actualMethod, JDBC_UPDATE) || hasMethod(actualMethod, JDBC_BATCH_UPDATE);
-    }
-
-    private boolean hasMethod(Method target, Method[] methods) {
-        for (Method m : methods) {
+    private boolean hasMethod(Method target) {
+        for (Method m : this.fetchingMethods) {
             if (target.equals(m)) {
                 return true;
             }

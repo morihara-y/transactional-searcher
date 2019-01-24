@@ -1,6 +1,7 @@
 package com.github.morihara.transactional.sercher.dao.spoon;
 
 import java.io.File;
+import java.lang.reflect.Method;
 import java.util.List;
 
 import com.github.morihara.transactional.sercher.dto.vo.SourceCodeVo;
@@ -32,17 +33,17 @@ public class SourceCodeFetchDaoImpl implements SourceCodeFetchDao {
     }
 
     @Override
-    public boolean hasUpdateSql(String sourceFolderPath, SourceCodeVo sourceCodeVo) {
+    public int hasMethod(String sourceFolderPath, SourceCodeVo sourceCodeVo, Method[] methods) {
         String classPath = makeClassPath(sourceFolderPath, sourceCodeVo);
         Launcher launcher = makeLauncherWithCommonArgs();
         launcher.addInputResource(new FileSystemFile(new File(classPath)));
         launcher.run();
         QueueProcessingManager queueProcessingManager = new QueueProcessingManager(launcher.getFactory());
-        return new ConfirmUpdateMethodsProcesser(sourceCodeVo).executeSpoon(queueProcessingManager);
+        return new CountTargetMethodsProcesser(sourceCodeVo, methods).executeSpoon(queueProcessingManager);
     }
 
     @Override
-    public boolean hasTransactionalAnnotation(SourceCodeVo sourceCodeVo) {
+    public boolean hasAnnotation(SourceCodeVo sourceCodeVo) {
         // TODO Auto-generated method stub
         return false;
     }

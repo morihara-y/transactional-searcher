@@ -1,15 +1,20 @@
 package com.github.morihara.transactional.sercher.dao.spoon;
 
+import java.lang.reflect.Method;
 import java.util.List;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.jdbc.core.JdbcTemplate;
 
+import com.github.morihara.transactional.sercher.dao.util.MethodsUtil;
 import com.github.morihara.transactional.sercher.dto.vo.SourceCodeVo;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SourceCodeFetchDaoImplTest {
+    private static final Method[] JDBC_BATCH_UPDATE = MethodsUtil.getDeclaredMethods(JdbcTemplate.class, "batchUpdate");
+
     @Test
     public void test() {
         String sourceFolderPath = "src/main/java";
@@ -20,7 +25,7 @@ public class SourceCodeFetchDaoImplTest {
         for (SourceCodeVo vo : result2) {
             System.out.println(vo.toUniqueMethodStr());
         }
-        boolean result3 = dao.hasUpdateSql(sourceFolderPath, makeTransactionalMethodDaoSourceCode());
+        int result3 = dao.hasMethod(sourceFolderPath, makeTransactionalMethodDaoSourceCode(), JDBC_BATCH_UPDATE);
         System.out.println(result3);
     }
 
