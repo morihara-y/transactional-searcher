@@ -6,6 +6,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Test;
@@ -21,6 +22,7 @@ import com.github.morihara.transactional.sercher.dto.vo.SourceCodeVo;
 public class SourceCodeFetchDaoImplTest {
     private static final String SOURCE_FOLDER_PATH = "src/main/java";
     private static final Method[] JDBC_BATCH_UPDATE = MethodsUtil.getDeclaredMethods(JdbcTemplate.class, "batchUpdate");
+    private static List<String> PACKAGE_PREFIX_LIST = Arrays.asList("com.github.morihara"); 
 
     @Test
     public void fetchPackagesBySourceFolderPath() {
@@ -35,6 +37,22 @@ public class SourceCodeFetchDaoImplTest {
         List<SourceCodeVo> result = dao.fetchMethodsByPackageName(SOURCE_FOLDER_PATH,
                 "com.github.morihara.transactional.sercher.dao.rdb");
         assertThat(result.size(), is(6));
+    }
+    
+    @Test
+    public void fetchCalledMethodsByMethod_private() {
+        SourceCodeFetchDao dao = new SourceCodeFetchDaoImpl();
+        List<SourceCodeVo> result = dao.fetchCalledMethodsByMethod(SOURCE_FOLDER_PATH,
+                makeRelatedDaoCodeDaoSourceCode(), PACKAGE_PREFIX_LIST);
+        assertThat(result.size(), is(2));
+    }
+
+    @Test
+    public void fetchCalledMethodsByMethod_includeImpl() {
+        SourceCodeFetchDao dao = new SourceCodeFetchDaoImpl();
+        List<SourceCodeVo> result = dao.fetchCalledMethodsByMethod(SOURCE_FOLDER_PATH,
+                makeTransactionalMethodDaoSourceCode(), PACKAGE_PREFIX_LIST);
+        assertThat(result.size(), is(15));
     }
 
     @Test
@@ -64,6 +82,16 @@ public class SourceCodeFetchDaoImplTest {
                 .className("TransactionalMethodDaoImpl")
                 .methodName("batchInsert")
                 .methodParam("java.util.List")
+                .methodType("void")
+                .build();
+    }
+
+    private SourceCodeVo makeRelatedDaoCodeDaoSourceCode() {
+        return SourceCodeVo.builder()
+                .packageName("com.github.morihara.transactional.sercher.dao.rdb")
+                .className("RelatedDaoCodeDaoImpl")
+                .methodName("batchUpsert")
+                .methodParam("java.util.List, java.util.List")
                 .methodType("void")
                 .build();
     }

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import com.github.morihara.transactional.sercher.dao.util.MethodsUtil;
 import com.github.morihara.transactional.sercher.dto.vo.SourceCodeVo;
 
 import lombok.RequiredArgsConstructor;
@@ -11,7 +13,6 @@ import spoon.processing.AbstractProcessor;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtMethod;
-import spoon.reflect.declaration.CtParameter;
 import spoon.support.QueueProcessingManager;
 
 @RequiredArgsConstructor
@@ -30,7 +31,7 @@ public class FetchMethodsProcesser extends AbstractProcessor<CtClass<CtElement>>
             if (method.isPrivate()) {
                 continue;
             }
-            SourceCodeVo sourceCodeVo = makeSourceCodeVo(className, method);
+            SourceCodeVo sourceCodeVo = MethodsUtil.makeSourceCodeVo(this.packageName, className, method);
             sourceCodeVoSet.add(sourceCodeVo);
         }
     }
@@ -40,27 +41,4 @@ public class FetchMethodsProcesser extends AbstractProcessor<CtClass<CtElement>>
         queueProcessingManager.process(queueProcessingManager.getFactory().Class().getAll());
         return new ArrayList<>(sourceCodeVoSet);
     }
-
-    private SourceCodeVo makeSourceCodeVo(String className, CtMethod<?> method) {
-        return SourceCodeVo.builder()
-                .packageName(packageName)
-                .className(className)
-                .methodName(method.getSimpleName())
-                .methodParam(makeParamStr(method))
-                .methodType(method.getType().getQualifiedName())
-                .build();
-    }
-
-    private String makeParamStr(CtMethod<?> method) {
-        List<CtParameter<?>> params = method.getParameters();
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < params.size(); i++) {
-            sb.append(params.get(i).getType().getQualifiedName());
-            if (i < params.size() - 1) {
-                sb.append(", ");
-            }
-        }
-        return sb.toString();
-    }
-
 }

@@ -33,6 +33,16 @@ public class SourceCodeFetchDaoImpl implements SourceCodeFetchDao {
     }
 
     @Override
+    public List<SourceCodeVo> fetchCalledMethodsByMethod(String sourceFolderPath, SourceCodeVo sourceCodeVo, List<String> packagePrefixList) {
+        String classPath = makeClassPath(sourceFolderPath, sourceCodeVo);
+        Launcher launcher = makeLauncherWithCommonArgs();
+        launcher.addInputResource(new FileSystemFile(new File(classPath)));
+        launcher.run();
+        QueueProcessingManager queueProcessingManager = new QueueProcessingManager(launcher.getFactory());
+        return new FetchChildMethodsProcesser(sourceCodeVo, packagePrefixList).executeSpoon(queueProcessingManager);
+    }
+
+    @Override
     public int hasMethod(String sourceFolderPath, SourceCodeVo sourceCodeVo, Method[] methods) {
         String classPath = makeClassPath(sourceFolderPath, sourceCodeVo);
         Launcher launcher = makeLauncherWithCommonArgs();

@@ -9,6 +9,8 @@ public interface SourceCodeFetchDao {
 
     List<SourceCodeVo> fetchMethodsByPackageName(String sourceFolderPath, String packageName);
 
+    List<SourceCodeVo> fetchCalledMethodsByMethod(String sourceFolderPath, SourceCodeVo sourceCodeVo, List<String> packagePrefixList);
+
     int hasMethod(String sourceFolderPath, SourceCodeVo sourceCodeVo, Method[] methods);
 
     boolean hasAnnotation(String sourceFolderPath, SourceCodeVo sourceCodeVo, Class<?> annotationType);
