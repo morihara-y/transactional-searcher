@@ -29,7 +29,7 @@ public class CountTargetMethodsProcesser extends AbstractProcessor<CtClass<CtEle
         if (Objects.isNull(method)) {
             return;
         }
-        countFetchingMethods(method, resultCnt);
+        countFetchingMethods(method);
     }
 
     int executeSpoon(QueueProcessingManager queueProcessingManager) {
@@ -40,7 +40,7 @@ public class CountTargetMethodsProcesser extends AbstractProcessor<CtClass<CtEle
     }
 
     @SuppressWarnings("rawtypes")
-    private void countFetchingMethods(CtMethod<?> method, int resultCnt) {
+    private void countFetchingMethods(CtMethod<?> method) {
         List<CtElement> elements = method.getElements(new AbstractFilter<CtElement>(CtElement.class) {
             @Override
             public boolean matches(CtElement element) {
@@ -53,7 +53,7 @@ public class CountTargetMethodsProcesser extends AbstractProcessor<CtClass<CtEle
             if (executableMethod != null) {
                 Method actualMethod = executableMethod.getActualMethod();
                 if (actualMethod != null && hasMethod(actualMethod)) {
-                    resultCnt++;
+                    this.resultCnt++;
                 }
             }
         }
