@@ -38,7 +38,7 @@ public class SourceCodeFetchDaoImplTest {
     }
 
     @Test
-    public void hasMethod_inTopLayer() {
+    public void hasMethod() {
         SourceCodeFetchDao dao = new SourceCodeFetchDaoImpl();
         int result = dao.hasMethod(SOURCE_FOLDER_PATH, makeTransactionalMethodDaoSourceCode(), JDBC_BATCH_UPDATE);
         assertThat(result, is(1));
