@@ -6,9 +6,11 @@ import com.github.morihara.transactional.sercher.dto.TransactionalMethodDto;
 public interface InvestigationService {
     List<String> getPackageNames(String sourceFolderPath);
 
-    List<TransactionalMethodDto> getTopLayerWithoutRegistered(String sourceFolderPath, List<String> packageNames);
+    List<TransactionalMethodDto> getTopLayerWithoutRegistered(String sourceFolderPath,
+            List<String> packageNames);
 
-    boolean isRDBUpdateService(TransactionalMethodDto transactionalMethodDto);
+    boolean isRDBUpdateService(String sourceFolderPath,
+            TransactionalMethodDto transactionalMethodDto, List<String> packagePrefixList);
 
     boolean isManagedTransactional(TransactionalMethodDto transactionalMethodDto);
 

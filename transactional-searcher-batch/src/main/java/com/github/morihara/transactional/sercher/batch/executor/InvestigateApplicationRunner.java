@@ -1,6 +1,7 @@
 package com.github.morihara.transactional.sercher.batch.executor;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -18,14 +19,18 @@ public class InvestigateApplicationRunner implements CommandLineRunner {
     public void run(String... arg0) throws Exception {
         log.info("----start investigation----");
         String sourceFolderPath = arg0[0];
+        String packagePrefixArgs = arg0[1];
         log.info("sourceFolderPath: {}", sourceFolderPath);
+        log.info("packagePrefixArgs: {}", packagePrefixArgs);
+        List<String> packagePrefixList = Arrays.asList(packagePrefixArgs);
         List<String> packageNames = investigationService.getPackageNames(sourceFolderPath);
         List<TransactionalMethodDto> transactionalMethodDtos =
                 investigationService.getTopLayerWithoutRegistered(sourceFolderPath, packageNames);
         List<TransactionalMethodDto> results = new ArrayList<>();
         for (TransactionalMethodDto transactionalMethodDto : transactionalMethodDtos) {
             if (investigationService.isManagedTransactional(transactionalMethodDto) 
-                    || !investigationService.isRDBUpdateService(transactionalMethodDto)) {
+                    || !investigationService.isRDBUpdateService(sourceFolderPath,
+                            transactionalMethodDto, packagePrefixList)) {
                 continue;
             }
             results.add(transactionalMethodDto);
