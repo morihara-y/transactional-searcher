@@ -3,9 +3,9 @@
 <configuration>
   <!-- for developers log back sample -->
   <!-- log location -->
-  <property name="logDir" value="./tomcat-log/sample/" />
-  <property name="fileName" value="TransactionApp" />
-  <property name="errorFileName" value="TransactionAppErr" />
+  <property name="logDir" value="./search-log/" />
+  <property name="fileName" value="App" />
+  <property name="errorFileName" value="AppErr" />
   <property name="fileExtension" value=".log" />
 
   <!-- max Property -->
