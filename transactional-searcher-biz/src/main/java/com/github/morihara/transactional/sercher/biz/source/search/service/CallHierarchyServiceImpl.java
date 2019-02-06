@@ -2,6 +2,7 @@ package com.github.morihara.transactional.sercher.biz.source.search.service;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import com.github.morihara.transactional.sercher.dao.spoon.SourceCodeFetchDao;
@@ -14,18 +15,20 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class CallHierarchyServiceImpl implements CallHierarchyService {
-    private SourceCodeFetchDao sourceCodeFetchDao;
+    private final SourceCodeFetchDao sourceCodeFetchDao;
 
     @Override
     public List<RelatedDaoCodeDto> fetchRelatedDaoCodesByCallHierarchy(String sourceFolderPath,
             TransactionalMethodDto transactionalMethodDto, List<String> packagePrefixList) {
         List<HierarchyVo> calledHierarchyList = new ArrayList<>();
-        callHierarchy(calledHierarchyList, sourceFolderPath,
-                transactionalMethodDto.getSourceCodeVo(), packagePrefixList);
+        List<String> memoList = new ArrayList<>();
+        SourceCodeVo baseSourceCodeVo = transactionalMethodDto.getSourceCodeVo();
+        memoList.add(baseSourceCodeVo.toUniqueMethodStr());
+        callHierarchy(calledHierarchyList, memoList, sourceFolderPath, baseSourceCodeVo, packagePrefixList);
         return makeResultList(transactionalMethodDto, calledHierarchyList);
     }
 
-    private void callHierarchy(List<HierarchyVo> calledHierarchyList, String sourceFolderPath,
+    private void callHierarchy(List<HierarchyVo> calledHierarchyList, List<String> memoList, String sourceFolderPath,
             SourceCodeVo sourceCodeVo, List<String> packagePrefixList) {
         List<SourceCodeVo> childSourceCodes = sourceCodeFetchDao
                 .fetchCalledMethodsByMethod(sourceFolderPath, sourceCodeVo, packagePrefixList);
@@ -33,8 +36,11 @@ public class CallHierarchyServiceImpl implements CallHierarchyService {
             return;
         }
         for (SourceCodeVo childSourceCodeVo : childSourceCodes) {
-            callHierarchy(calledHierarchyList, sourceFolderPath, childSourceCodeVo,
-                    packagePrefixList);
+            if (memoList.contains(childSourceCodeVo.toUniqueMethodStr())) {
+                continue;
+            }
+            memoList.add(childSourceCodeVo.toUniqueMethodStr());
+            callHierarchy(calledHierarchyList, memoList, sourceFolderPath, childSourceCodeVo, packagePrefixList);
         }
     }
 
