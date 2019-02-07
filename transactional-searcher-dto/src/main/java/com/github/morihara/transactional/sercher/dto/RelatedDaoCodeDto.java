@@ -11,4 +11,5 @@ public class RelatedDaoCodeDto {
     private UUID transactionalMethodId;
     private int seq;
     private SourceCodeVo relatedDaoCodeVo;
+    private int updateMethodCnt;
 }

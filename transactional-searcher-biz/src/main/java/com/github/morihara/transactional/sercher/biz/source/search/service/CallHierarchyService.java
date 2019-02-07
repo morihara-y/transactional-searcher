@@ -5,6 +5,6 @@ import com.github.morihara.transactional.sercher.dto.RelatedDaoCodeDto;
 import com.github.morihara.transactional.sercher.dto.TransactionalMethodDto;
 
 public interface CallHierarchyService {
-    List<RelatedDaoCodeDto> fetchRelatedDaoCodesByCallHierarchy(String sourceFolderPath,
-            TransactionalMethodDto transactionalMethodDto, List<String> packagePrefixList);
+    List<RelatedDaoCodeDto> fetchRelatedDaoCodesByCallHierarchy(TransactionalMethodDto transactionalMethodDto,
+            List<String> packagePrefixList);
 }

@@ -10,6 +10,7 @@ CREATE TABLE related_dao_code (
   method_name varchar(50) NOT NULL,
   method_param varchar(200) NOT NULL,
   method_type varchar(200) NOT NULL,
+  update_method_cnt int,
   PRIMARY KEY(transactional_method_id,seq)
 );
 
