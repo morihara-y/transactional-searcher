@@ -1,16 +1,23 @@
 package com.github.morihara.transactional.sercher.dao.spoon;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
+
 import com.github.morihara.transactional.sercher.dto.vo.SourceCodeVo;
 
+import lombok.extern.slf4j.Slf4j;
 import spoon.Launcher;
+import spoon.SpoonException;
 import spoon.support.QueueProcessingManager;
 import spoon.support.compiler.FileSystemFile;
 import spoon.support.compiler.FileSystemFolder;
 
+@Slf4j
 public class SourceCodeFetchDaoImpl implements SourceCodeFetchDao {
 
     @Override
@@ -33,7 +40,8 @@ public class SourceCodeFetchDaoImpl implements SourceCodeFetchDao {
     }
 
     @Override
-    public List<SourceCodeVo> fetchCalledMethodsByMethod(String sourceFolderPath, SourceCodeVo sourceCodeVo, List<String> packagePrefixList) {
+    public List<SourceCodeVo> fetchCalledMethodsByMethod(String sourceFolderPath,
+            SourceCodeVo sourceCodeVo, List<String> packagePrefixList) {
         String classPath = makeClassPath(sourceFolderPath, sourceCodeVo);
         Launcher launcher = makeLauncherWithCommonArgs();
         launcher.addInputResource(new FileSystemFile(new File(classPath)));
@@ -82,8 +90,21 @@ public class SourceCodeFetchDaoImpl implements SourceCodeFetchDao {
     }
 
     private Launcher makeLauncherWithCommonArgs() {
-        Launcher launcher = new Launcher();
-        launcher.setArgs(new String[] {"--output-type", "nooutput"});
-        return launcher;
+        try {
+            Launcher launcher = new Launcher();
+            File classpathFile = new File("classpath.txt");
+            log.debug("Filepath: {}", classpathFile.getAbsolutePath());
+            launcher.setArgs(new String[] {
+                    "--output-type",
+                    "nooutput",
+                    "--source-classpath",
+                    StringUtils.strip(FileUtils.readFileToString(classpathFile, "utf-8"), "\n\r\t ")
+            });
+            return launcher;
+        } catch (IOException e) {
+            log.error("classpath.txt is required. \n"
+                    + "please run \"mvn dependency:build-classpath | grep -v \".*\\[.*\\].*\" > classpath.txt\".");
+            throw new SpoonException(e);
+        }
     }
 }
