@@ -41,7 +41,7 @@ public class InvestigationServiceImpl implements InvestigationService {
             results.addAll(topLayerMethods.stream()
                     .filter(topLayerMethod -> !transactionalMethodDao.fetchByMethod(sourceFolderPath, topLayerMethod)
                             .isPresent())
-                    .map(this::makeNewTransactionalMethodDto)
+                    .map(result -> makeNewTransactionalMethodDto(sourceFolderPath, result))
                     .collect(Collectors.toList()));
         }
         return results;
@@ -79,9 +79,10 @@ public class InvestigationServiceImpl implements InvestigationService {
         relatedDaoCodeDao.batchUpsert(transactionalMethodIds, relatedDaoCodes);
     }
 
-    private TransactionalMethodDto makeNewTransactionalMethodDto(SourceCodeVo sourceCodeVo) {
+    private TransactionalMethodDto makeNewTransactionalMethodDto(String sourceFolderPath, SourceCodeVo sourceCodeVo) {
         return TransactionalMethodDto.builder()
                 .transactionalMethodId(UUID.randomUUID())
+                .sourceFolderPath(sourceFolderPath)
                 .sourceCodeVo(sourceCodeVo)
                 .developStatus(DevelopStatusEnum.IS_REQUIRED)
                 .build();
