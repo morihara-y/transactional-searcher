@@ -28,7 +28,7 @@ public class SourceCodeFetchDaoImplTest {
     public void fetchPackagesBySourceFolderPath() {
         SourceCodeFetchDao dao = new SourceCodeFetchDaoImpl();
         List<String> result = dao.fetchPackagesBySourceFolderPath(SOURCE_FOLDER_PATH);
-        assertThat(result.size(), is(3));
+        assertThat(result.size(), is(4));
     }
 
     @Test
