@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Repository;
 
 import com.github.morihara.transactional.sercher.dto.vo.SourceCodeVo;
 
@@ -17,6 +18,7 @@ import spoon.support.QueueProcessingManager;
 import spoon.support.compiler.FileSystemFile;
 import spoon.support.compiler.FileSystemFolder;
 
+@Repository
 @Slf4j
 public class SourceCodeFetchDaoImpl implements SourceCodeFetchDao {
 

@@ -15,8 +15,6 @@ import com.github.morihara.transactional.sercher.batch.executor.InvestigateAppli
 
 import lombok.extern.slf4j.Slf4j;
 
-@SpringBootApplication
-@Import({MainConfig.class})
 @Slf4j
 public class TrnSrch {
 

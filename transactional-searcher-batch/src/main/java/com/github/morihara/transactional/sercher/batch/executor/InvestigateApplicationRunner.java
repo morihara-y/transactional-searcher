@@ -5,11 +5,17 @@ import java.util.Arrays;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Import;
+
+import com.github.morihara.transactional.sercher.batch.config.MainConfig;
 import com.github.morihara.transactional.sercher.biz.service.InvestigationService;
 import com.github.morihara.transactional.sercher.dto.TransactionalMethodDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+@SpringBootApplication
+@Import({MainConfig.class})
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Slf4j
 public class InvestigateApplicationRunner implements CommandLineRunner {
