@@ -27,9 +27,8 @@ public class TrnSrch {
             CommandLine cmdLine = parser.parse(opt, args);
             String sourceFolderPath = cmdLine.getOptionValue("s");
             String packagePrefixArgs = cmdLine.getOptionValue("p");
-            String isRebuildMode = cmdLine.getOptionValue("r");
-            SpringApplication.run(InvestigateApplicationRunner.class, sourceFolderPath, packagePrefixArgs,
-                    isRebuildMode);
+            // String isRebuildMode = cmdLine.getOptionValue("r");
+            SpringApplication.run(InvestigateApplicationRunner.class, sourceFolderPath, packagePrefixArgs);
         } catch (ParseException e) {
             log.error("error: ", e);
         }
