@@ -95,12 +95,15 @@ public class SourceCodeFetchDaoImpl implements SourceCodeFetchDao {
         try {
             Launcher launcher = new Launcher();
             File classpathFile = new File("classpath.txt");
-            log.debug("Filepath: {}", classpathFile.getAbsolutePath());
+            String classpathes = StringUtils.strip(FileUtils.readFileToString(classpathFile, "utf-8"), "\n\r\t ")
+                    + ":"
+                    + System.getProperty("user.dir")
+                    + "/target/classes";
             launcher.setArgs(new String[] {
                     "--output-type",
                     "nooutput",
                     "--source-classpath",
-                    StringUtils.strip(FileUtils.readFileToString(classpathFile, "utf-8"), "\n\r\t ")
+                    classpathes
             });
             return launcher;
         } catch (IOException e) {
