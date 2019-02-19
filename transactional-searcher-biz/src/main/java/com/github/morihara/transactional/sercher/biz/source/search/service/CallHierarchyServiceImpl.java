@@ -1,7 +1,6 @@
 package com.github.morihara.transactional.sercher.biz.source.search.service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,9 +15,11 @@ import com.github.morihara.transactional.sercher.dto.vo.SourceCodeVo;
 import com.github.morihara.transactional.sercher.service.enumrate.TargetMethodEnum;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CallHierarchyServiceImpl implements CallHierarchyService {
     private final SourceCodeFetchDao sourceCodeFetchDao;
 
@@ -28,22 +29,25 @@ public class CallHierarchyServiceImpl implements CallHierarchyService {
     public List<RelatedDaoCodeDto> fetchRelatedDaoCodesByCallHierarchy(TransactionalMethodDto transactionalMethodDto,
             List<String> packagePrefixList) {
         List<RelatedDaoCodeDto> resultList = new ArrayList<>();
-        SourceCodeVo baseSourceCodeVo = transactionalMethodDto.getSourceCodeVo();
-        MEMO_MAP.put(baseSourceCodeVo.toUniqueMethodStr(), new ArrayList<>(Arrays.asList(baseSourceCodeVo)));
         // It fetches the methods in dao in order to search the code called update/insert sql
-        callHierarchy(resultList, transactionalMethodDto, baseSourceCodeVo, packagePrefixList, new AtomicInteger(0));
+        callHierarchy(resultList, transactionalMethodDto, transactionalMethodDto.getSourceCodeVo(), packagePrefixList,
+                new AtomicInteger(0));
         return resultList;
     }
 
     private void callHierarchy(List<RelatedDaoCodeDto> resultList, TransactionalMethodDto transactionalMethodDto,
             SourceCodeVo sourceCodeVo, List<String> packagePrefixList, AtomicInteger seqAtomicInt) {
+        log.debug("start callHierarchy. sourceCodeVo: {}", sourceCodeVo.toUniqueMethodStr());
         List<SourceCodeVo> childSourceCodes = MEMO_MAP.computeIfAbsent(sourceCodeVo.toUniqueMethodStr(),
                 f -> sourceCodeFetchDao.fetchCalledMethodsByMethod(transactionalMethodDto.getSourceFolderPath(),
                         sourceCodeVo, packagePrefixList));
+        log.debug("sourceCodeVo: {}, child size: {}", sourceCodeVo.toUniqueMethodStr(), childSourceCodes.size());
         if (CollectionUtils.isEmpty(childSourceCodes)) {
+            log.debug("finish callHierarchy. last sourceCodeVo: {}", sourceCodeVo.toUniqueMethodStr());
             return;
         }
         for (SourceCodeVo childSourceCodeVo : childSourceCodes) {
+            log.debug("childSourceCodeVo: {}", childSourceCodeVo.toUniqueMethodStr());
             int updateMethodCnt = hasUpdateMethod(transactionalMethodDto.getSourceFolderPath(), childSourceCodeVo);
             if (updateMethodCnt > 0) {
                 resultList.add(RelatedDaoCodeDto.builder()
