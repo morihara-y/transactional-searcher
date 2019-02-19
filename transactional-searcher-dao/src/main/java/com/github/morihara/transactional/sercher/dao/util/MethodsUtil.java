@@ -15,6 +15,7 @@ import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtParameter;
 import spoon.reflect.factory.Factory;
+import spoon.reflect.reference.CtExecutableReference;
 import spoon.reflect.reference.CtTypeReference;
 
 public class MethodsUtil {
@@ -71,6 +72,17 @@ public class MethodsUtil {
                 .build();
     }
 
+    public static SourceCodeVo makeSourceCodeVo(CtExecutableReference<?> executableMethod) {
+        CtTypeReference<?> executableMethodTypeRef = executableMethod.getDeclaringType();
+        return SourceCodeVo.builder()
+                .packageName(executableMethodTypeRef.getPackage().getQualifiedName())
+                .className(executableMethodTypeRef.getSimpleName())
+                .methodName(executableMethod.getSimpleName())
+                .methodParam(makeParamStr(executableMethod))
+                .methodType(executableMethod.getType().getQualifiedName())
+                .build();
+    }
+
     private static String makeParamStr(CtMethod<?> method) {
         List<CtParameter<?>> ctParams = method.getParameters();
         if (CollectionUtils.isEmpty(ctParams)) {
@@ -91,6 +103,17 @@ public class MethodsUtil {
         for (int i = 0; i < paramTypes.length; i++) {
             params.add(paramTypes[i].getName());
         }
+        return makeParamStr(params);
+    }
+
+    private static String makeParamStr(CtExecutableReference<?> executableMethod) {
+        List<CtTypeReference<?>> ctParams = executableMethod.getParameters();
+        if (CollectionUtils.isEmpty(ctParams)) {
+            return StringUtils.EMPTY;
+        }
+        List<String> params = ctParams.stream()
+                .map(ctParam -> ctParam.getQualifiedName())
+                .collect(Collectors.toList());
         return makeParamStr(params);
     }
 

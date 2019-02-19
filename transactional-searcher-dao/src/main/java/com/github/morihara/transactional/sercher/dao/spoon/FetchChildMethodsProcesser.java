@@ -1,6 +1,5 @@
 package com.github.morihara.transactional.sercher.dao.spoon;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -12,6 +11,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import com.github.morihara.transactional.sercher.dao.util.MethodsUtil;
 import com.github.morihara.transactional.sercher.dto.vo.SourceCodeVo;
 
+import lombok.extern.slf4j.Slf4j;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtAbstractInvocation;
 import spoon.reflect.declaration.CtClass;
@@ -21,6 +21,7 @@ import spoon.reflect.reference.CtExecutableReference;
 import spoon.reflect.visitor.filter.AbstractFilter;
 import spoon.support.QueueProcessingManager;
 
+@Slf4j
 public class FetchChildMethodsProcesser extends AbstractProcessor<CtClass<CtElement>> {
     private final SourceCodeVo sourceCodeVo;
     private final List<String> packageNamePrefixList;
@@ -62,17 +63,42 @@ public class FetchChildMethodsProcesser extends AbstractProcessor<CtClass<CtElem
         for (CtElement element : elements) {
             CtAbstractInvocation invocation = (CtAbstractInvocation)element;
             CtExecutableReference<?> executableMethod = invocation.getExecutable();
-            if (executableMethod != null) {
-                Method actualMethod = executableMethod.getActualMethod();
-                if (actualMethod != null && isTargetPackage(actualMethod)) {
-                    result.add(MethodsUtil.makeSourceCodeVo(actualMethod));
-                }
+            log.debug("executableMethod: {}", executableMethod);
+            if (canIgnoreMethod(executableMethod)) {
+                continue;
+            }
+            if (isTargetPackage(executableMethod)) {
+                result.add(MethodsUtil.makeSourceCodeVo(executableMethod));
             }
         }
     }
-    
-    private boolean isTargetPackage(Method method) {
-        String packageName = method.getDeclaringClass().getPackage().getName();
+
+    private boolean canIgnoreMethod(CtExecutableReference<?> executableMethod) {
+        if (executableMethod == null) {
+            log.warn("executableMethod is null.");
+            return true;
+        }
+        if (executableMethod.getDeclaringType() == null) {
+            log.warn("executableMethod.getDeclaringType is null. \nmethod: {}", executableMethod);
+            return true;
+        }
+        if (executableMethod.getDeclaringType().getPackage() == null) {
+            log.debug("It is an auto generated method. \nmethod: {}, class: {}", executableMethod,
+                    executableMethod.getDeclaringType());
+            return true;
+        }
+        if (executableMethod.getType() == null) {
+            log.debug("It is an auto generated method. \nmethod: {}", executableMethod);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isTargetPackage(CtExecutableReference<?> executableMethod) {
+        if (executableMethod.getDeclaringType().getPackage() == null) {
+            log.error("getPackage {}", executableMethod);
+        }
+        String packageName = executableMethod.getDeclaringType().getPackage().getQualifiedName();
         for (String packageNamePrefix : packageNamePrefixList) {
             if (packageName.startsWith(packageNamePrefix)) {
                 return true;
