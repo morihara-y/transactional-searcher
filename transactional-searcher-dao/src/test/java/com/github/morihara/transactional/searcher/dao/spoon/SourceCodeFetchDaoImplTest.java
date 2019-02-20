@@ -37,7 +37,7 @@ public class SourceCodeFetchDaoImplTest {
     public void fetchMethodsByPackageName() {
         SourceCodeFetchDao dao = new SourceCodeFetchDaoImpl();
         List<SourceCodeVo> result = dao.fetchMethodsByPackageName(SOURCE_FOLDER_PATH,
-                "com.github.morihara.transactional.sercher.dao.rdb");
+                "com.github.morihara.transactional.searcher.dao.rdb");
         assertThat(result.size(), is(6));
     }
     
@@ -80,7 +80,7 @@ public class SourceCodeFetchDaoImplTest {
 
     private SourceCodeVo makeTransactionalMethodDaoSourceCode() {
         return SourceCodeVo.builder()
-                .packageName("com.github.morihara.transactional.sercher.dao.rdb")
+                .packageName("com.github.morihara.transactional.searcher.dao.rdb")
                 .className("TransactionalMethodDaoImpl")
                 .methodName("batchInsert")
                 .methodParam("java.util.List")
@@ -90,7 +90,7 @@ public class SourceCodeFetchDaoImplTest {
 
     private SourceCodeVo makeRelatedDaoCodeDaoSourceCode() {
         return SourceCodeVo.builder()
-                .packageName("com.github.morihara.transactional.sercher.dao.rdb")
+                .packageName("com.github.morihara.transactional.searcher.dao.rdb")
                 .className("RelatedDaoCodeDaoImpl")
                 .methodName("batchUpsert")
                 .methodParam("java.util.List, java.util.List")
