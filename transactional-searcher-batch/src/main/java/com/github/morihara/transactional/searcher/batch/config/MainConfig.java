@@ -9,6 +9,6 @@ import com.github.morihara.transactional.searcher.biz.config.BizConfig;
 @Configuration
 @Import(value = {
         BizConfig.class})
-@ComponentScan({ "com.github.morihara.transactional.sercher.batch.executor" })
+@ComponentScan({ "com.github.morihara.transactional.searcher.batch.executor" })
 public class MainConfig {
 }

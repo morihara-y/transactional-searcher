@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Import;
 import com.github.morihara.transactional.searcher.dao.config.DaoConfig;
 
 @Configuration
-@ComponentScan({"com.github.morihara.transactional.sercher.biz"})
+@ComponentScan({"com.github.morihara.transactional.searcher.biz"})
 @Import(value = {
         DaoConfig.class })
 public class BizConfig {
