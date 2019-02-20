@@ -35,9 +35,10 @@ public class InvestigateApplicationRunner implements CommandLineRunner {
                 investigationService.getTopLayerWithoutRegistered(sourceFolderPath, packageNames);
         List<TransactionalMethodDto> results = new ArrayList<>();
         for (TransactionalMethodDto transactionalMethodDto : transactionalMethodDtos) {
-            if (investigationService.isManagedTransactional(transactionalMethodDto) 
-                    || !investigationService.isRDBUpdateService(sourceFolderPath,
-                            transactionalMethodDto, packagePrefixList)) {
+            if (!investigationService.isRDBUpdateService(sourceFolderPath, transactionalMethodDto, packagePrefixList)) {
+                log.debug("it is not rdb update service. \nsourceCodeVo: {}, \nrelatedDaoCodes: {}",
+                        transactionalMethodDto.getSourceCodeVo().toUniqueMethodStr(),
+                        transactionalMethodDto.getRelatedDaoCodes().size());
                 continue;
             }
             results.add(transactionalMethodDto);

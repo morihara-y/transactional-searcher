@@ -50,13 +50,9 @@ public class InvestigationServiceImpl implements InvestigationService {
     @Override
     public boolean isRDBUpdateService(String sourceFolderPath,
             TransactionalMethodDto transactionalMethodDto, List<String> packagePrefixList) {
-        List<RelatedDaoCodeDto> relatedDaoCodes = callHierarchyService
-                .fetchRelatedDaoCodesByCallHierarchy(transactionalMethodDto, packagePrefixList);
-        if (!relatedDaoCodes.isEmpty()) {
-            transactionalMethodDto.setRelatedDaoCodes(relatedDaoCodes);
-            return true;
-        }
-        return false;
+        transactionalMethodDto = callHierarchyService.fetchRelatedDaoCodesByCallHierarchy(transactionalMethodDto,
+                packagePrefixList);
+        return !transactionalMethodDto.getRelatedDaoCodes().isEmpty();
     }
 
     @Override

@@ -27,13 +27,14 @@ public class CallHierarchyServiceImpl implements CallHierarchyService {
     private static final Map<String, List<SourceCodeVo>> MEMO_MAP = new HashMap<>();
 
     @Override
-    public List<RelatedDaoCodeDto> fetchRelatedDaoCodesByCallHierarchy(TransactionalMethodDto transactionalMethodDto,
+    public TransactionalMethodDto fetchRelatedDaoCodesByCallHierarchy(TransactionalMethodDto transactionalMethodDto,
             List<String> packagePrefixList) {
-        List<RelatedDaoCodeDto> resultList = new ArrayList<>();
+        List<RelatedDaoCodeDto> relatedDaoCodes = new ArrayList<>();
         // It fetches the methods in dao in order to search the code called update/insert sql
-        callHierarchy(resultList, transactionalMethodDto, transactionalMethodDto.getSourceCodeVo(), packagePrefixList,
+        callHierarchy(relatedDaoCodes, transactionalMethodDto, transactionalMethodDto.getSourceCodeVo(), packagePrefixList,
                 new AtomicInteger(0));
-        return resultList;
+        transactionalMethodDto.setRelatedDaoCodes(relatedDaoCodes);
+        return transactionalMethodDto;
     }
 
     private void callHierarchy(List<RelatedDaoCodeDto> resultList, TransactionalMethodDto transactionalMethodDto,
@@ -42,13 +43,11 @@ public class CallHierarchyServiceImpl implements CallHierarchyService {
         List<SourceCodeVo> childSourceCodes = MEMO_MAP.computeIfAbsent(sourceCodeVo.toUniqueMethodStr(),
                 f -> sourceCodeFetchDao.fetchCalledMethodsByMethod(transactionalMethodDto.getSourceFolderPath(),
                         sourceCodeVo, packagePrefixList));
-        log.debug("sourceCodeVo: {}, child size: {}", sourceCodeVo.toUniqueMethodStr(), childSourceCodes.size());
         if (CollectionUtils.isEmpty(childSourceCodes)) {
             log.debug("finish callHierarchy. last sourceCodeVo: {}", sourceCodeVo.toUniqueMethodStr());
             return;
         }
         for (SourceCodeVo childSourceCodeVo : childSourceCodes) {
-            log.debug("childSourceCodeVo: {}", childSourceCodeVo.toUniqueMethodStr());
             int updateMethodCnt = hasUpdateMethod(transactionalMethodDto.getSourceFolderPath(), childSourceCodeVo);
             if (updateMethodCnt > 0) {
                 resultList.add(RelatedDaoCodeDto.builder()
