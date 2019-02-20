@@ -6,6 +6,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementSetter;
@@ -55,12 +57,18 @@ public class RelatedDaoCodeDaoImpl implements RelatedDaoCodeDao {
     }
 
     private void delete(List<UUID> transactionalMethodIds) {
+        if (CollectionUtils.isEmpty(transactionalMethodIds)) {
+            return;
+        }
         final String sql = "delete from related_dao_code where transactional_method_id in (:ids)";
         Map<String, List<UUID>> idsParameters = Collections.singletonMap("ids", transactionalMethodIds);
         jdbc.update(sql, idsParameters);
     }
 
     private void batchInsert(List<RelatedDaoCodeDto> relatedDaoCodes) {
+        if (CollectionUtils.isEmpty(relatedDaoCodes)) {
+            return;
+        }
         final int batchSize = 100;
         final String sql = "insert into related_dao_code ("
                 + "transactional_method_id, "

@@ -3,9 +3,11 @@ package com.github.morihara.transactional.sercher.dao.rdb;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementSetter;
@@ -44,6 +46,9 @@ public class TransactionalMethodDaoImpl implements TransactionalMethodDao {
 
     @Override
     public void batchInsert(List<TransactionalMethodDto> transactionalMethodDtos) {
+        if (CollectionUtils.isEmpty(transactionalMethodDtos)) {
+            return;
+        }
         final String sql = "insert into transactional_method ("
                 + "transactional_method_id, "
                 + "source_folder_path, "
@@ -80,6 +85,9 @@ public class TransactionalMethodDaoImpl implements TransactionalMethodDao {
 
     @Override
     public void updateDevelopStatus(TransactionalMethodDto transactionalMethodDto) {
+        if (Objects.isNull(transactionalMethodDto)) {
+            return;
+        }
         jdbc.update(
                 "update transactional_method set develop_status = ?, ticket_no = ?"
                         + " where transactional_method_id = ?",
@@ -90,6 +98,9 @@ public class TransactionalMethodDaoImpl implements TransactionalMethodDao {
 
     @Override
     public void delete(UUID transactionalMethodId) {
+        if (Objects.isNull(transactionalMethodId)) {
+            return;
+        }
         jdbc.update("delete from transactional_method where transactional_method_id = ?",
                 transactionalMethodId);
     }
