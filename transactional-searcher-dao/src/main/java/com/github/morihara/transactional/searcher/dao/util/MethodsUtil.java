@@ -80,6 +80,7 @@ public class MethodsUtil {
                 .methodName(executableMethod.getSimpleName())
                 .methodParam(makeParamStr(executableMethod))
                 .methodType(executableMethod.getType().getQualifiedName())
+                .isInterface(executableMethodTypeRef.isInterface())
                 .build();
     }
 

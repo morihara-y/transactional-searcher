@@ -11,6 +11,7 @@ public class SourceCodeVo {
     private String methodName;
     private String methodParam;
     private String methodType;
+    private boolean isInterface;
 
     public String toUniqueMethodStr() {
         StringBuilder sb = new StringBuilder();
