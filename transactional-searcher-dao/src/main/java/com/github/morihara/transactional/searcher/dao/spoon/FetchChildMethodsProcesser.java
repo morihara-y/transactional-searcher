@@ -95,9 +95,6 @@ public class FetchChildMethodsProcesser extends AbstractProcessor<CtClass<CtElem
     }
 
     private boolean isTargetPackage(CtExecutableReference<?> executableMethod) {
-        if (executableMethod.getDeclaringType().getPackage() == null) {
-            log.error("getPackage {}", executableMethod);
-        }
         String packageName = executableMethod.getDeclaringType().getPackage().getQualifiedName();
         for (String packageNamePrefix : packageNamePrefixList) {
             if (packageName.startsWith(packageNamePrefix)) {
