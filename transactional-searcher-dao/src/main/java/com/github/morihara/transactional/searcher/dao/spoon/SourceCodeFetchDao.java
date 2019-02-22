@@ -2,7 +2,9 @@ package com.github.morihara.transactional.searcher.dao.spoon;
 
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Map;
 
+import com.github.morihara.transactional.searcher.dto.vo.BeanDefinitionVo;
 import com.github.morihara.transactional.searcher.dto.vo.SourceCodeVo;
 
 public interface SourceCodeFetchDao {
@@ -16,4 +18,7 @@ public interface SourceCodeFetchDao {
     int hasMethod(String sourceFolderPath, SourceCodeVo sourceCodeVo, Method[] methods);
 
     boolean hasAnnotation(String sourceFolderPath, SourceCodeVo sourceCodeVo, Class<?> annotationType);
+
+    void updateBeanDefinitionMap(String sourceFolderPath, String springConfigPath, List<String> packagePrefixList,
+            Map<String, List<BeanDefinitionVo>> beanDefinitionMap);
 }

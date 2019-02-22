@@ -4,11 +4,13 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
+import com.github.morihara.transactional.searcher.dto.vo.BeanDefinitionVo;
 import com.github.morihara.transactional.searcher.dto.vo.SourceCodeVo;
 
 import lombok.extern.slf4j.Slf4j;
@@ -72,6 +74,17 @@ public class SourceCodeFetchDaoImpl implements SourceCodeFetchDao {
         return new ConfirmTargetAnnotationProcesser(sourceCodeVo, annotationType).executeSpoon(queueProcessingManager);
     }
 
+    @Override
+    public void updateBeanDefinitionMap(String sourceFolderPath, String springConfigPath,
+            List<String> packagePrefixList, Map<String, List<BeanDefinitionVo>> beanDefinitionMap) {
+        String classPath = makeClassPath(sourceFolderPath, springConfigPath);
+        Launcher launcher = makeLauncherWithCommonArgs();
+        launcher.addInputResource(new FileSystemFile(new File(classPath)));
+        launcher.run();
+        QueueProcessingManager queueProcessingManager = new QueueProcessingManager(launcher.getFactory());
+        new FetchCreatedBeanProcesser(packagePrefixList, beanDefinitionMap).executeSpoon(queueProcessingManager);
+    }
+
     private String makePackagePath(String sourceFolderPath, String packageName) {
         StringBuilder sb = new StringBuilder();
         sb.append(sourceFolderPath);
@@ -90,6 +103,16 @@ public class SourceCodeFetchDaoImpl implements SourceCodeFetchDao {
         sb.append(".java");
         return sb.toString();
     }
+
+    private String makeClassPath(String sourceFolderPath, String path) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(sourceFolderPath);
+        sb.append("/");
+        sb.append(path.replaceAll("\\.", "/"));
+        sb.append(".java");
+        return sb.toString();
+    }
+
 
     private Launcher makeLauncherWithCommonArgs() {
         try {

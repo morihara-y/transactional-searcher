@@ -7,7 +7,9 @@ import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,11 +20,13 @@ import org.springframework.transaction.annotation.Transactional;
 import com.github.morihara.transactional.searcher.dao.spoon.SourceCodeFetchDao;
 import com.github.morihara.transactional.searcher.dao.spoon.SourceCodeFetchDaoImpl;
 import com.github.morihara.transactional.searcher.dao.util.MethodsUtil;
+import com.github.morihara.transactional.searcher.dto.vo.BeanDefinitionVo;
 import com.github.morihara.transactional.searcher.dto.vo.SourceCodeVo;
 
 @RunWith(JUnit4.class)
 public class SourceCodeFetchDaoImplTest {
     private static final String SOURCE_FOLDER_PATH = "src/main/java";
+    private static final String TEST_SOURCE_FOLDER_PATH = "src/test/java";
     private static final Method[] JDBC_BATCH_UPDATE = MethodsUtil.getDeclaredMethods(JdbcTemplate.class, "batchUpdate");
     private static List<String> PACKAGE_PREFIX_LIST = Arrays.asList("com.github.morihara"); 
 
@@ -76,6 +80,15 @@ public class SourceCodeFetchDaoImplTest {
         SourceCodeFetchDao dao = new SourceCodeFetchDaoImpl();
         boolean result = dao.hasAnnotation(SOURCE_FOLDER_PATH, makeTransactionalMethodDaoSourceCode(), Transactional.class);
         assertFalse(result);
+    }
+
+    @Test
+    public void updateBeanDefinitionMap() {
+        SourceCodeFetchDao dao = new SourceCodeFetchDaoImpl();
+        Map<String, List<BeanDefinitionVo>> result = new HashMap<>();
+        String springConfigPathList = "com.github.morihara.transactional.searcher.dao.config.TestDaoConfig1";
+        dao.updateBeanDefinitionMap(TEST_SOURCE_FOLDER_PATH, springConfigPathList, PACKAGE_PREFIX_LIST, result);
+        assertThat(result.size(), is(3));
     }
 
     private SourceCodeVo makeTransactionalMethodDaoSourceCode() {
