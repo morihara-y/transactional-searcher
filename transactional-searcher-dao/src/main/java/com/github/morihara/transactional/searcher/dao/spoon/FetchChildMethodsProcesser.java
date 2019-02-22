@@ -50,10 +50,9 @@ public class FetchChildMethodsProcesser extends AbstractProcessor<CtClass<CtElem
         return new ArrayList<>(this.result);
     }
 
-    @SuppressWarnings("rawtypes")
     private void updateFetchingChildMethods(CtMethod<?> method) {
         List<CtExecutableReference<?>> executableMethods = MethodsUtil.fetchChildExecutableMethods(method);
-        for (CtExecutableReference executableMethod : executableMethods) {
+        for (CtExecutableReference<?> executableMethod : executableMethods) {
             if (canIgnoreMethod(executableMethod)) {
                 continue;
             }
