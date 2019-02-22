@@ -13,12 +13,10 @@ import com.github.morihara.transactional.searcher.dto.vo.SourceCodeVo;
 
 import lombok.extern.slf4j.Slf4j;
 import spoon.processing.AbstractProcessor;
-import spoon.reflect.code.CtAbstractInvocation;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.reference.CtExecutableReference;
-import spoon.reflect.visitor.filter.AbstractFilter;
 import spoon.support.QueueProcessingManager;
 
 @Slf4j
@@ -54,16 +52,8 @@ public class FetchChildMethodsProcesser extends AbstractProcessor<CtClass<CtElem
 
     @SuppressWarnings("rawtypes")
     private void updateFetchingChildMethods(CtMethod<?> method) {
-        List<CtElement> elements = method.getElements(new AbstractFilter<CtElement>(CtElement.class) {
-            @Override
-            public boolean matches(CtElement element) {
-                return element instanceof CtAbstractInvocation;
-            }
-        });
-        for (CtElement element : elements) {
-            CtAbstractInvocation invocation = (CtAbstractInvocation)element;
-            CtExecutableReference<?> executableMethod = invocation.getExecutable();
-            log.debug("executableMethod: {}", executableMethod);
+        List<CtExecutableReference<?>> executableMethods = MethodsUtil.fetchChildExecutableMethods(method);
+        for (CtExecutableReference executableMethod : executableMethods) {
             if (canIgnoreMethod(executableMethod)) {
                 continue;
             }

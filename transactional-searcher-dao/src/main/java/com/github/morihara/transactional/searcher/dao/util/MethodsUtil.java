@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.github.morihara.transactional.searcher.dto.vo.SourceCodeVo;
 
+import spoon.reflect.code.CtAbstractInvocation;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtMethod;
@@ -17,6 +18,7 @@ import spoon.reflect.declaration.CtParameter;
 import spoon.reflect.factory.Factory;
 import spoon.reflect.reference.CtExecutableReference;
 import spoon.reflect.reference.CtTypeReference;
+import spoon.reflect.visitor.filter.AbstractFilter;
 
 public class MethodsUtil {
     private MethodsUtil() {
@@ -82,6 +84,22 @@ public class MethodsUtil {
                 .methodType(executableMethod.getType().getQualifiedName())
                 .isInterface(executableMethodTypeRef.isInterface())
                 .build();
+    }
+    
+    @SuppressWarnings("rawtypes")
+    public static List<CtExecutableReference<?>> fetchChildExecutableMethods(CtMethod<?> method) {
+        List<CtElement> elements = method.getElements(new AbstractFilter<CtElement>(CtElement.class) {
+            @Override
+            public boolean matches(CtElement element) {
+                return element instanceof CtAbstractInvocation;
+            }
+        });
+        return elements.stream()
+                .map(element -> {
+                    CtAbstractInvocation invocation = (CtAbstractInvocation)element;
+                    return invocation.getExecutable();
+                })
+                .collect(Collectors.toList());
     }
 
     private static String makeParamStr(CtMethod<?> method) {
