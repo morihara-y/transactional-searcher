@@ -40,6 +40,16 @@ public class CallHierarchyServiceImpl implements CallHierarchyService {
     private void callHierarchy(List<RelatedDaoCodeDto> resultList, TransactionalMethodDto transactionalMethodDto,
             SourceCodeVo sourceCodeVo, List<String> packagePrefixList, AtomicInteger seqAtomicInt) {
         log.debug("start callHierarchy. sourceCodeVo: {}", sourceCodeVo.toUniqueMethodStr());
+        int updateMethodCnt = hasUpdateMethod(transactionalMethodDto.getSourceFolderPath(), sourceCodeVo);
+        if (updateMethodCnt > 0) {
+            resultList.add(RelatedDaoCodeDto.builder()
+                    .transactionalMethodId(transactionalMethodDto.getTransactionalMethodId())
+                    .seq(seqAtomicInt.incrementAndGet())
+                    .relatedDaoCodeVo(sourceCodeVo)
+                    .updateMethodCnt(updateMethodCnt)
+                    .build());
+        }
+
         List<SourceCodeVo> childSourceCodes = MEMO_MAP.computeIfAbsent(sourceCodeVo.toUniqueMethodStr(),
                 f -> sourceCodeFetchDao.fetchCalledMethodsByMethod(transactionalMethodDto.getSourceFolderPath(),
                         sourceCodeVo, packagePrefixList));
@@ -48,15 +58,6 @@ public class CallHierarchyServiceImpl implements CallHierarchyService {
             return;
         }
         for (SourceCodeVo childSourceCodeVo : childSourceCodes) {
-            int updateMethodCnt = hasUpdateMethod(transactionalMethodDto.getSourceFolderPath(), childSourceCodeVo);
-            if (updateMethodCnt > 0) {
-                resultList.add(RelatedDaoCodeDto.builder()
-                        .transactionalMethodId(transactionalMethodDto.getTransactionalMethodId())
-                        .seq(seqAtomicInt.incrementAndGet())
-                        .relatedDaoCodeVo(childSourceCodeVo)
-                        .updateMethodCnt(updateMethodCnt)
-                        .build());
-            }
             callHierarchy(resultList, transactionalMethodDto, childSourceCodeVo, packagePrefixList, seqAtomicInt);
         }
     }
