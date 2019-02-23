@@ -7,8 +7,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.github.morihara.transactional.searcher.dao.rdb.RelatedDaoCodeDao;
 import com.github.morihara.transactional.searcher.dao.rdb.RelatedDaoCodeDaoImpl;
-import com.github.morihara.transactional.searcher.dao.rdb.TransactionalMethodDao;
-import com.github.morihara.transactional.searcher.dao.rdb.TransactionalMethodDaoImpl;
 
 @Configuration
 public class TestDaoConfig3 {
