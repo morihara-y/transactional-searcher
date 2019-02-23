@@ -58,7 +58,7 @@ public class SourceCodeFetchDaoImplTest {
         SourceCodeFetchDao dao = new SourceCodeFetchDaoImpl();
         List<SourceCodeVo> result = dao.fetchCalledMethodsByMethod(SOURCE_FOLDER_PATH,
                 makeTransactionalMethodDaoSourceCode(), PACKAGE_PREFIX_LIST);
-        assertThat(result.size(), is(15));
+        assertThat(result.size(), is(0));
     }
 
     @Test
