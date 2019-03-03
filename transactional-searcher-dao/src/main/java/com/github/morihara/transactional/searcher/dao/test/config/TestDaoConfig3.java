@@ -1,4 +1,4 @@
-package com.github.morihara.transactional.searcher.dao.config;
+package com.github.morihara.transactional.searcher.dao.test.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
