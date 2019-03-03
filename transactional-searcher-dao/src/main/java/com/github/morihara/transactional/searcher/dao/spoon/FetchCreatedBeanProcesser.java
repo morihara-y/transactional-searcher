@@ -16,34 +16,33 @@ import org.springframework.context.annotation.Import;
 
 import com.github.morihara.transactional.searcher.dao.util.MethodsUtil;
 import com.github.morihara.transactional.searcher.dto.vo.BeanDefinitionVo;
-
+import com.github.morihara.transactional.searcher.dto.vo.MetadataResourceVo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import spoon.processing.AbstractProcessor;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.reference.CtExecutableReference;
 import spoon.reflect.reference.CtTypeReference;
-import spoon.support.QueueProcessingManager;
 
 @RequiredArgsConstructor
 @Slf4j
-public class FetchCreatedBeanProcesser extends AbstractProcessor<CtClass<CtElement>> {
-    private final List<String> packageNamePrefixList;
+public class FetchCreatedBeanProcesser {
+    private final String configQualifiedName;
     private final Map<String, List<BeanDefinitionVo>> result;
+    private final Map<String, MetadataResourceVo> metadataResourceMap;
 
     private static final Set<String> SCANED_CONFIG_PATHS = new HashSet<>();
     private static final Set<String> SCANED_BEAN_NAME = new HashSet<>();
 
-    @Override
-    public void process(CtClass<CtElement> element) {
-        scanConfig(element);
+    private void process(CtClass<CtElement> configElement) {
+        scanConfig(configElement);
     }
 
-    void executeSpoon(QueueProcessingManager queueProcessingManager) {
-        queueProcessingManager.addProcessor(this);
-        queueProcessingManager.process(queueProcessingManager.getFactory().Class().getAll());
+    void executeSpoon() {
+        MetadataResourceVo configMetadataResource =
+                this.metadataResourceMap.get(this.configQualifiedName);
+        this.process(configMetadataResource.getElement());
     }
 
     private void scanConfig(CtClass<CtElement> configElement) {
@@ -83,10 +82,6 @@ public class FetchCreatedBeanProcesser extends AbstractProcessor<CtClass<CtEleme
         List<CtExecutableReference<?>> executableMethods = MethodsUtil.fetchChildExecutableMethods(method);
         Optional<String> implClassQualifiedName = getImplClassQualifiedName(interfaceClassType, executableMethods);
         if (!implClassQualifiedName.isPresent()) {
-            return Optional.empty();
-        }
-
-        if (!isTargetPackage(implClassQualifiedName.get())) {
             return Optional.empty();
         }
 
@@ -135,7 +130,7 @@ public class FetchCreatedBeanProcesser extends AbstractProcessor<CtClass<CtEleme
             if (canIgnoreConfigClass(importedClass)) {
                 continue;
             }
-            results.add(getFactory().Class().get(importedClass));
+            results.add(metadataResourceMap.get(importedClass.getName()).getElement());
             SCANED_CONFIG_PATHS.add(importedClass.getName());
         }
         return results;
@@ -143,21 +138,12 @@ public class FetchCreatedBeanProcesser extends AbstractProcessor<CtClass<CtEleme
 
     private boolean canIgnoreConfigClass(Class<?> importedClass) {
         if (SCANED_CONFIG_PATHS.contains(importedClass.getName())) {
-            log.debug("it has already scaned. importedClass: {}", importedClass.getName());
+            log.info("it has already scaned. importedClass: {}", importedClass.getName());
             return true;
         }
-        if (!isTargetPackage(importedClass.getPackage().getName())) {
-            log.debug("it is not target class. importedClass: {}", importedClass.getName());
+        if (!this.metadataResourceMap.containsKey(importedClass.getName())) {
+            log.info("it is not scaned class. importedClass: {}", importedClass.getName());
             return true;
-        }
-        return false;
-    }
-
-    private boolean isTargetPackage(String packageName) {
-        for (String packageNamePrefix : this.packageNamePrefixList) {
-            if (packageName.startsWith(packageNamePrefix)) {
-                return true;
-            }
         }
         return false;
     }

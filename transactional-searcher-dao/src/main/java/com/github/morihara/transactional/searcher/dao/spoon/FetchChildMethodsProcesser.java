@@ -3,55 +3,36 @@ package com.github.morihara.transactional.searcher.dao.spoon;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
+import java.util.Map;
 import java.util.Set;
-
 import org.apache.commons.collections4.CollectionUtils;
-
 import com.github.morihara.transactional.searcher.dao.util.MethodsUtil;
+import com.github.morihara.transactional.searcher.dto.vo.BeanDefinitionVo;
+import com.github.morihara.transactional.searcher.dto.vo.MetadataResourceVo;
 import com.github.morihara.transactional.searcher.dto.vo.SourceCodeVo;
-
 import lombok.extern.slf4j.Slf4j;
-import spoon.processing.AbstractProcessor;
-import spoon.reflect.declaration.CtClass;
-import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.reference.CtExecutableReference;
-import spoon.support.QueueProcessingManager;
 
 @Slf4j
-public class FetchChildMethodsProcesser extends AbstractProcessor<CtClass<CtElement>> {
-    private final SourceCodeVo sourceCodeVo;
+public class FetchChildMethodsProcesser {
     private final List<String> packageNamePrefixList;
+    private final Map<String, MetadataResourceVo> metadataResourceMap;
     private Set<SourceCodeVo> result;
 
-    public FetchChildMethodsProcesser(SourceCodeVo sourceCodeVo, List<String> filterPackagePrefixList) {
+    public FetchChildMethodsProcesser(List<String> filterPackagePrefixList,
+            Map<String, MetadataResourceVo> metadataResourceMap) {
         super();
         if (CollectionUtils.isEmpty(filterPackagePrefixList)) {
             throw new IllegalArgumentException("filterPackagePrefixList is required");
         }
-        this.sourceCodeVo = sourceCodeVo;
         this.packageNamePrefixList = filterPackagePrefixList;
+        this.metadataResourceMap = metadataResourceMap;
     }
 
-    @Override
-    public void process(CtClass<CtElement> element) {
-        CtMethod<?> method = MethodsUtil.fetchTargetMethod(element, this.sourceCodeVo, getFactory());
-        if (Objects.isNull(method)) {
-            return;
-        }
-        updateFetchingChildMethods(method);
-    }
-
-    List<SourceCodeVo> executeSpoon(QueueProcessingManager queueProcessingManager) {
-        this.result = new HashSet<>();
-        queueProcessingManager.addProcessor(this);
-        queueProcessingManager.process(queueProcessingManager.getFactory().Class().getAll());
-        return new ArrayList<>(this.result);
-    }
-
-    private void updateFetchingChildMethods(CtMethod<?> method) {
-        List<CtExecutableReference<?>> executableMethods = MethodsUtil.fetchChildExecutableMethods(method);
+    private void process(CtMethod<?> method) {
+        List<CtExecutableReference<?>> executableMethods =
+                MethodsUtil.fetchChildExecutableMethods(method);
         for (CtExecutableReference<?> executableMethod : executableMethods) {
             if (canIgnoreMethod(executableMethod)) {
                 continue;
@@ -60,6 +41,24 @@ public class FetchChildMethodsProcesser extends AbstractProcessor<CtClass<CtElem
                 result.add(MethodsUtil.makeSourceCodeVo(executableMethod));
             }
         }
+    }
+
+    List<SourceCodeVo> executeSpoon(SourceCodeVo sourceCodeVo,
+            Map<String, List<BeanDefinitionVo>> beanDefinitionMap) {
+        this.result = new HashSet<>();
+        this.process(getImplementedMethod(sourceCodeVo, beanDefinitionMap));
+        return new ArrayList<>(this.result);
+    }
+
+    private CtMethod<?> getImplementedMethod(SourceCodeVo sourceCodeVo,
+            Map<String, List<BeanDefinitionVo>> beanDefinitionMap) {
+        String classQualifierName = sourceCodeVo.getClassQualifierName();
+        MetadataResourceVo metadata = this.metadataResourceMap.get(classQualifierName);
+        if (!metadata.isInterface()) {
+            return MethodsUtil.fetchTargetMethod(metadata.getElement(), sourceCodeVo); 
+        }
+        // get impled method from bean definition map  
+        return null;
     }
 
     private boolean canIgnoreMethod(CtExecutableReference<?> executableMethod) {

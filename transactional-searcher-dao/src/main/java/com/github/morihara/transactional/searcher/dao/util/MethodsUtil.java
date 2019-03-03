@@ -3,6 +3,7 @@ package com.github.morihara.transactional.searcher.dao.util;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -39,19 +40,25 @@ public class MethodsUtil {
         }
     }
 
-    public static CtMethod<?> fetchTargetMethod(CtClass<CtElement> element, SourceCodeVo sourceCodeVo,
-            Factory factory) {
+    public static CtMethod<?> fetchTargetMethod(CtClass<CtElement> element, SourceCodeVo sourceCodeVo) {
         String methodParamStr = sourceCodeVo.getMethodParam();
         if (StringUtils.isEmpty(methodParamStr)) {
             return element.getMethod(sourceCodeVo.getMethodName());
         }
-        String[] methodTypeStrs = sourceCodeVo.getMethodParam().split(", ");
-        int typeCnt = methodTypeStrs.length;
-        CtTypeReference<?>[] methodTypes = new CtTypeReference<?>[typeCnt];
-        for (int i = 0; i < typeCnt; i++) {
-            methodTypes[i] = factory.Type().createReference(methodTypeStrs[i]);
+
+        List<CtMethod<?>> methods = element.getMethodsByName(sourceCodeVo.getMethodName());
+        if (methods.size() == 1) {
+            return methods.get(1);
         }
-        return element.getMethod(sourceCodeVo.getMethodName(), methodTypes);
+
+        String[] paramTypes = sourceCodeVo.getMethodParam().split(", ");
+        for (CtMethod<?> method : methods) {
+            if (equalParams(method, paramTypes)) {
+                return method;
+            }
+        }
+        throw new IllegalArgumentException(
+                "There is no method. Method:" + sourceCodeVo.toUniqueMethodStr());
     }
 
     public static SourceCodeVo makeSourceCodeVo(String packageName, String className, CtMethod<?> method) {
@@ -145,5 +152,23 @@ public class MethodsUtil {
             }
         }
         return sb.toString();
+    }
+
+    private static boolean equalParams(CtMethod<?> method, String[] paramTypes) {
+        List<CtParameter<?>> params = method.getParameters();
+        int paramCnt = params.size();
+        if (paramCnt != paramTypes.length) {
+            return false;
+        }
+
+        int match = 0; 
+        for (CtParameter<?> param : params) {
+            for (String paramType : paramTypes) {
+                if (param.getType().getQualifiedName().equals(paramType)) {
+                    match++;
+                }
+            }
+        }
+        return match == paramTypes.length;
     }
 }

@@ -22,7 +22,7 @@ public class ConfirmTargetAnnotationProcesser extends AbstractProcessor<CtClass<
 
     @Override
     public void process(CtClass<CtElement> element) {
-        CtMethod<?> method = MethodsUtil.fetchTargetMethod(element, this.sourceCodeVo, getFactory());
+        CtMethod<?> method = MethodsUtil.fetchTargetMethod(element, this.sourceCodeVo);
         if (Objects.isNull(method)) {
             return;
         }

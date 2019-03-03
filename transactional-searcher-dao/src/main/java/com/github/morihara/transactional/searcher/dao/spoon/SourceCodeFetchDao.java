@@ -9,14 +9,19 @@ import com.github.morihara.transactional.searcher.dto.vo.MetadataResourceVo;
 import com.github.morihara.transactional.searcher.dto.vo.SourceCodeVo;
 
 public interface SourceCodeFetchDao {
-    void walkJarFile(String jarPath, Map<String, MetadataResourceVo> metadataResourceMap,
-            Map<String, List<BeanDefinitionVo>> beanDefinitionMap);
+    void walkJarFile(String jarPath, String jarName,
+            Map<String, MetadataResourceVo> metadataResourceMap);
+
+    void makeBeanDefinitionMap(String configQualifiedName,
+            Map<String, List<BeanDefinitionVo>> beanDefinitionMap,
+            Map<String, MetadataResourceVo> metadataResourceMap);
 
     List<SourceCodeVo> fetchPublicMethodsByAnotation(Annotation annotation,
             Map<String, MetadataResourceVo> metadataResourceMap);
 
     List<SourceCodeVo> fetchCalledMethodsByMethod(SourceCodeVo sourceCodeVo,
-            List<String> daoPackageNames, Map<String, MetadataResourceVo> metadataResourceMap,
+            List<String> filterPackagePrefixList,
+            Map<String, MetadataResourceVo> metadataResourceMap,
             Map<String, List<BeanDefinitionVo>> beanDefinitionMap);
 
     int hasMethod(SourceCodeVo sourceCodeVo, Method[] methods,

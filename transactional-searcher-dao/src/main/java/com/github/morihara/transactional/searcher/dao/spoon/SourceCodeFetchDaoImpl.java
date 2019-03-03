@@ -21,40 +21,54 @@ import spoon.Launcher;
 import spoon.SpoonException;
 import spoon.support.QueueProcessingManager;
 import spoon.support.compiler.FileSystemFile;
-import spoon.support.compiler.FileSystemFolder;
 
 @Repository
 @Slf4j
 public class SourceCodeFetchDaoImpl implements SourceCodeFetchDao {
+    private static final String TMP_FOLDER_PATH = System.getProperty("java.io.tmpdir");
+//    private static final String SOURCE_FOLDER_PATH = "src/main/java";
 
     @Override
-    public void walkJarFile(String jarPath, Map<String, MetadataResourceVo> metadataResourceMap,
-            Map<String, List<BeanDefinitionVo>> beanDefinitionMap) {
-        JarLauncher launcher = new JarLauncher(jarPath);
+    public void walkJarFile(String jarPath, String jarName,
+            Map<String, MetadataResourceVo> metadataResourceMap) {
+        String resourceFolderPath = TMP_FOLDER_PATH 
+                + System.getProperty("file.separator")
+                + jarName;
+        JarLauncher launcher = new JarLauncher(jarPath, resourceFolderPath);
         launcher.setArgs(new String[] {"--output-type", "nooutput"});
+        launcher.addInputResource(resourceFolderPath);
         launcher.run();
         QueueProcessingManager queueProcessingManager = new QueueProcessingManager(launcher.getFactory());
+        new WalkJarFileProcesser(metadataResourceMap).executeSpoon(queueProcessingManager);
+    }
+
+    @Override
+    public void makeBeanDefinitionMap(String configQualifiedName,
+            Map<String, List<BeanDefinitionVo>> beanDefinitionMap,
+            Map<String, MetadataResourceVo> metadataResourceMap) {
+        new FetchCreatedBeanProcesser(configQualifiedName, beanDefinitionMap, metadataResourceMap)
+                .executeSpoon();
     }
 
     @Override
     public List<SourceCodeVo> fetchPublicMethodsByAnotation(Annotation annotation,
             Map<String, MetadataResourceVo> metadataResourceMap) {
-        // TODO Auto-generated method stub
-        return null;
+        return new FetchImplementedMethodsProcesser(annotation.annotationType(),
+                metadataResourceMap).executeSpoon();
     }
 
     @Override
     public List<SourceCodeVo> fetchCalledMethodsByMethod(SourceCodeVo sourceCodeVo,
-            List<String> daoPackageNames, Map<String, MetadataResourceVo> metadataResourceMap,
+            List<String> filterPackagePrefixList,
+            Map<String, MetadataResourceVo> metadataResourceMap,
             Map<String, List<BeanDefinitionVo>> beanDefinitionMap) {
-        // TODO Auto-generated method stub
-        return null;
+        return new FetchChildMethodsProcesser(filterPackagePrefixList, metadataResourceMap)
+                .executeSpoon(sourceCodeVo, beanDefinitionMap);
     }
 
     @Override
     public int hasMethod(SourceCodeVo sourceCodeVo, Method[] methods,
             Map<String, MetadataResourceVo> metadataResourceMap) {
-        // TODO Auto-generated method stub
         return 0;
     }
 
@@ -63,33 +77,6 @@ public class SourceCodeFetchDaoImpl implements SourceCodeFetchDao {
             Map<String, MetadataResourceVo> metadataResourceMap) {
         // TODO Auto-generated method stub
         return false;
-    }
-
-    public List<String> fetchPackagesBySourceFolderPath(String sourceFolderPath) {
-        Launcher launcher = makeLauncherWithCommonArgs();
-        launcher.addInputResource(new FileSystemFolder(new File(sourceFolderPath)));
-        launcher.run();
-        QueueProcessingManager queueProcessingManager = new QueueProcessingManager(launcher.getFactory());
-        return new FetchPackagesProcesser().executeSpoon(queueProcessingManager);
-    }
-
-    public List<SourceCodeVo> fetchMethodsByPackageName(String sourceFolderPath, String packageName) {
-        String packageNamePath = makePackagePath(sourceFolderPath, packageName);
-        Launcher launcher = makeLauncherWithCommonArgs();
-        launcher.addInputResource(new FileSystemFolder(new File(packageNamePath)));
-        launcher.run();
-        QueueProcessingManager queueProcessingManager = new QueueProcessingManager(launcher.getFactory());
-        return new FetchMethodsProcesser(packageName).executeSpoon(queueProcessingManager);
-    }
-
-    public List<SourceCodeVo> fetchCalledMethodsByMethod(String sourceFolderPath,
-            SourceCodeVo sourceCodeVo, List<String> packagePrefixList) {
-        String classPath = makeClassPath(sourceFolderPath, sourceCodeVo);
-        Launcher launcher = makeLauncherWithCommonArgs();
-        launcher.addInputResource(new FileSystemFile(new File(classPath)));
-        launcher.run();
-        QueueProcessingManager queueProcessingManager = new QueueProcessingManager(launcher.getFactory());
-        return new FetchChildMethodsProcesser(sourceCodeVo, packagePrefixList).executeSpoon(queueProcessingManager);
     }
 
     public int hasMethod(String sourceFolderPath, SourceCodeVo sourceCodeVo, Method[] methods) {
@@ -110,24 +97,6 @@ public class SourceCodeFetchDaoImpl implements SourceCodeFetchDao {
         return new ConfirmTargetAnnotationProcesser(sourceCodeVo, annotationType).executeSpoon(queueProcessingManager);
     }
 
-    public void updateBeanDefinitionMap(String sourceFolderPath, String springConfigPath,
-            List<String> packagePrefixList, Map<String, List<BeanDefinitionVo>> beanDefinitionMap) {
-        String classPath = makeClassPath(sourceFolderPath, springConfigPath);
-        Launcher launcher = makeLauncherWithCommonArgs();
-        launcher.addInputResource(new FileSystemFile(new File(classPath)));
-        launcher.run();
-        QueueProcessingManager queueProcessingManager = new QueueProcessingManager(launcher.getFactory());
-        new FetchCreatedBeanProcesser(packagePrefixList, beanDefinitionMap).executeSpoon(queueProcessingManager);
-    }
-
-    private String makePackagePath(String sourceFolderPath, String packageName) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(sourceFolderPath);
-        sb.append("/");
-        sb.append(packageName.replaceAll("\\.", "/"));
-        return sb.toString();
-    }
-
     private String makeClassPath(String sourceFolderPath, SourceCodeVo sourceCodeVo) {
         StringBuilder sb = new StringBuilder();
         sb.append(sourceFolderPath);
@@ -139,17 +108,8 @@ public class SourceCodeFetchDaoImpl implements SourceCodeFetchDao {
         return sb.toString();
     }
 
-    private String makeClassPath(String sourceFolderPath, String path) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(sourceFolderPath);
-        sb.append("/");
-        sb.append(path.replaceAll("\\.", "/"));
-        sb.append(".java");
-        return sb.toString();
-    }
 
-
-    private Launcher makeLauncherWithCommonArgs() {
+     private Launcher makeLauncherWithCommonArgs() {
         try {
             Launcher launcher = new Launcher();
             File classpathFile = new File("classpath.txt");

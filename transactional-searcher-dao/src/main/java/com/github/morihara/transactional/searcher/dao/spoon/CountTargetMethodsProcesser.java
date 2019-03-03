@@ -25,7 +25,7 @@ public class CountTargetMethodsProcesser extends AbstractProcessor<CtClass<CtEle
 
     @Override
     public void process(CtClass<CtElement> element) {
-        CtMethod<?> method = MethodsUtil.fetchTargetMethod(element, this.sourceCodeVo, getFactory());
+        CtMethod<?> method = MethodsUtil.fetchTargetMethod(element, this.sourceCodeVo);
         if (Objects.isNull(method)) {
             return;
         }

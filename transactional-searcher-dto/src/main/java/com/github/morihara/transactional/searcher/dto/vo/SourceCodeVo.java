@@ -25,4 +25,12 @@ public class SourceCodeVo {
         sb.append(")");
         return sb.toString();
     }
+
+    public String getClassQualifierName() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(this.packageName);
+        sb.append(".");
+        sb.append(this.className);
+        return sb.toString();
+    }
 }
