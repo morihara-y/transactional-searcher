@@ -1,6 +1,5 @@
 package com.github.morihara.transactional.searcher.dao.spoon;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
@@ -16,13 +15,12 @@ public interface SourceCodeFetchDao {
             Map<String, List<BeanDefinitionVo>> beanDefinitionMap,
             Map<String, MetadataResourceVo> metadataResourceMap);
 
-    List<SourceCodeVo> fetchPublicMethodsByAnotation(Annotation annotation,
+    List<SourceCodeVo> fetchPublicMethodsByClassAnotation(Class<?> annotationType,
             Map<String, MetadataResourceVo> metadataResourceMap);
 
     List<SourceCodeVo> fetchCalledMethodsByMethod(SourceCodeVo sourceCodeVo,
             List<String> filterPackagePrefixList,
-            Map<String, MetadataResourceVo> metadataResourceMap,
-            Map<String, List<BeanDefinitionVo>> beanDefinitionMap);
+            Map<String, MetadataResourceVo> metadataResourceMap);
 
     int hasMethod(SourceCodeVo sourceCodeVo, Method[] methods,
             Map<String, MetadataResourceVo> metadataResourceMap);

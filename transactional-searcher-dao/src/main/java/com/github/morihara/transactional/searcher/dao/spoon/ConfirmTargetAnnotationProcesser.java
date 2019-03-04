@@ -1,28 +1,24 @@
 package com.github.morihara.transactional.searcher.dao.spoon;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import com.github.morihara.transactional.searcher.dao.util.MethodsUtil;
+import com.github.morihara.transactional.searcher.dto.vo.MetadataResourceVo;
 import com.github.morihara.transactional.searcher.dto.vo.SourceCodeVo;
 
 import lombok.RequiredArgsConstructor;
-import spoon.processing.AbstractProcessor;
 import spoon.reflect.declaration.CtAnnotation;
-import spoon.reflect.declaration.CtClass;
-import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtMethod;
-import spoon.support.QueueProcessingManager;
 
 @RequiredArgsConstructor
-public class ConfirmTargetAnnotationProcesser extends AbstractProcessor<CtClass<CtElement>> {
-    private final SourceCodeVo sourceCodeVo;
+public class ConfirmTargetAnnotationProcesser {
     private final Class<?> annotationType;
+    private final Map<String, MetadataResourceVo> metadataResourceMap;
     private boolean result;
 
-    @Override
-    public void process(CtClass<CtElement> element) {
-        CtMethod<?> method = MethodsUtil.fetchTargetMethod(element, this.sourceCodeVo);
+    private void process(CtMethod<?> method) {
         if (Objects.isNull(method)) {
             return;
         }
@@ -35,10 +31,11 @@ public class ConfirmTargetAnnotationProcesser extends AbstractProcessor<CtClass<
         }
     }
 
-    boolean executeSpoon(QueueProcessingManager queueProcessingManager) {
+    boolean executeSpoon(SourceCodeVo sourceCodeVo) {
         this.result = false;
-        queueProcessingManager.addProcessor(this);
-        queueProcessingManager.process(queueProcessingManager.getFactory().Class().getAll());
+        String classQualifierName = sourceCodeVo.getClassQualifierName();
+        MetadataResourceVo metadata = this.metadataResourceMap.get(classQualifierName);
+        this.process(MethodsUtil.fetchTargetMethod(metadata.getElement(), sourceCodeVo));
         return this.result;
     }
 }

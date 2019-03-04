@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
 import com.github.morihara.transactional.searcher.dao.util.MethodsUtil;
-import com.github.morihara.transactional.searcher.dto.vo.BeanDefinitionVo;
 import com.github.morihara.transactional.searcher.dto.vo.MetadataResourceVo;
 import com.github.morihara.transactional.searcher.dto.vo.SourceCodeVo;
 import lombok.extern.slf4j.Slf4j;
@@ -43,22 +42,12 @@ public class FetchChildMethodsProcesser {
         }
     }
 
-    List<SourceCodeVo> executeSpoon(SourceCodeVo sourceCodeVo,
-            Map<String, List<BeanDefinitionVo>> beanDefinitionMap) {
+    List<SourceCodeVo> executeSpoon(SourceCodeVo sourceCodeVo) {
         this.result = new HashSet<>();
-        this.process(getImplementedMethod(sourceCodeVo, beanDefinitionMap));
-        return new ArrayList<>(this.result);
-    }
-
-    private CtMethod<?> getImplementedMethod(SourceCodeVo sourceCodeVo,
-            Map<String, List<BeanDefinitionVo>> beanDefinitionMap) {
         String classQualifierName = sourceCodeVo.getClassQualifierName();
         MetadataResourceVo metadata = this.metadataResourceMap.get(classQualifierName);
-        if (!metadata.isInterface()) {
-            return MethodsUtil.fetchTargetMethod(metadata.getElement(), sourceCodeVo); 
-        }
-        // get impled method from bean definition map  
-        return null;
+        this.process(MethodsUtil.fetchTargetMethod(metadata.getElement(), sourceCodeVo));
+        return new ArrayList<>(this.result);
     }
 
     private boolean canIgnoreMethod(CtExecutableReference<?> executableMethod) {
