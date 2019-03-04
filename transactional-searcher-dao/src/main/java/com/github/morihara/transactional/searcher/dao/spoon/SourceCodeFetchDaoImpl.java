@@ -33,15 +33,14 @@ public class SourceCodeFetchDaoImpl implements SourceCodeFetchDao {
     }
 
     @Override
-    public void makeBeanDefinitionMap(String configQualifiedName,
+    public void makeBeanDefinitionMap(Class<?>[] annotationTypes,
             Map<String, List<BeanDefinitionVo>> beanDefinitionMap,
             Map<String, MetadataResourceVo> metadataResourceMap) {
-        new FetchCreatedBeanProcesser(configQualifiedName, beanDefinitionMap, metadataResourceMap)
-                .executeSpoon();
+        new FetchBeansFromConfigProcesser(annotationTypes, beanDefinitionMap, metadataResourceMap).executeSpoon();
     }
 
     @Override
-    public List<SourceCodeVo> fetchPublicMethodsByClassAnotation(Class<?> annotationType,
+    public List<SourceCodeVo> fetchImplementedMethodsByClassAnotation(Class<?> annotationType,
             Map<String, MetadataResourceVo> metadataResourceMap) {
         return new FetchImplementedMethodsProcesser(annotationType, metadataResourceMap).executeSpoon();
     }

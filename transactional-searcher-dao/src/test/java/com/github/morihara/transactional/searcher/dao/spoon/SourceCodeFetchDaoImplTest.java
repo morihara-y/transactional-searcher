@@ -15,6 +15,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,15 +50,15 @@ public class SourceCodeFetchDaoImplTest {
     public void updateBeanDefinitionMap() {
         SourceCodeFetchDao dao = new SourceCodeFetchDaoImpl();
         Map<String, List<BeanDefinitionVo>> result = new HashMap<>();
-        String springConfigPathList = "com.github.morihara.transactional.searcher.dao.test.config.TestDaoConfig1";
-        dao.makeBeanDefinitionMap(springConfigPathList, result, METADATA_RESOURCE_MAP);
+        Class<?>[] configClass = {Configuration.class};
+        dao.makeBeanDefinitionMap(configClass, result, METADATA_RESOURCE_MAP);
         assertThat(result.size(), is(3));
     }
 
     @Test
     public void fetchPublicMethodsByAnotation() {
         SourceCodeFetchDao dao = new SourceCodeFetchDaoImpl();
-        List<SourceCodeVo> result = dao.fetchPublicMethodsByClassAnotation(Repository.class, METADATA_RESOURCE_MAP);
+        List<SourceCodeVo> result = dao.fetchImplementedMethodsByClassAnotation(Repository.class, METADATA_RESOURCE_MAP);
         assertThat(result.size(), is(3));
     }
 

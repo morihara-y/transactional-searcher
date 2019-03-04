@@ -11,14 +11,13 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Import;
 
 import com.github.morihara.transactional.searcher.dao.util.MethodsUtil;
 import com.github.morihara.transactional.searcher.dto.vo.BeanDefinitionVo;
 import com.github.morihara.transactional.searcher.dto.vo.MetadataResourceVo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import spoon.reflect.declaration.CtAnnotation;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtMethod;
@@ -27,41 +26,18 @@ import spoon.reflect.reference.CtTypeReference;
 
 @RequiredArgsConstructor
 @Slf4j
-public class FetchCreatedBeanProcesser {
-    private final String configQualifiedName;
+public class FetchBeansFromConfigProcesser {
+    private final Class<?>[] annotationTypes;
     private final Map<String, List<BeanDefinitionVo>> result;
     private final Map<String, MetadataResourceVo> metadataResourceMap;
 
-    private static final Set<String> SCANED_CONFIG_PATHS = new HashSet<>();
     private static final Set<String> SCANED_BEAN_NAME = new HashSet<>();
 
-    private void process(CtClass<CtElement> configElement) {
-        scanConfig(configElement);
-    }
-
-    void executeSpoon() {
-        MetadataResourceVo configMetadataResource =
-                this.metadataResourceMap.get(this.configQualifiedName);
-        this.process(configMetadataResource.getElement());
-    }
-
-    private void scanConfig(CtClass<CtElement> configElement) {
-        scanBeansFromConfig(configElement);
-        if (configElement.hasAnnotation(ComponentScan.class)) {
-            log.warn("@ComponentScan is not supported");
-        }
-        if (!configElement.hasAnnotation(Import.class)) {
+    private void process(CtClass<CtElement> element) {
+        if (!isTargetClass(element)) {
             return;
         }
-        for (CtClass<CtElement> childConfigElement : getImportedClasses(configElement)) {
-            scanConfig(childConfigElement);
-        }
-    }
-
-    private void scanBeansFromConfig(CtClass<?> configElement) {
-        log.info("scan ConfigClass. conficClassPath: {}", configElement.getQualifiedName());
-        Set<CtMethod<?>> methods = configElement.getMethods();
-        for (CtMethod<?> method : methods) {
+        for (CtMethod<?> method : element.getMethods()) {
             Optional<BeanDefinitionVo> beanDefinitionVo = makeBeanDefinitionVo(method);
             if (!beanDefinitionVo.isPresent()) {
                 continue;
@@ -71,6 +47,23 @@ public class FetchCreatedBeanProcesser {
             this.result.get(interfaceClassPath).add(beanDefinitionVo.get());
             SCANED_BEAN_NAME.add(method.getSimpleName());
         }
+    }
+
+    void executeSpoon() {
+        for (Map.Entry<String, MetadataResourceVo> entry : this.metadataResourceMap.entrySet()) {
+            this.process(entry.getValue().getElement());
+        }
+    }
+
+    private boolean isTargetClass(CtClass<CtElement> element) {
+        for (CtAnnotation<?> annotation : element.getAnnotations()) {
+            for (Class<?> annotationType : this.annotationTypes) {
+                if (annotation.getType().getQualifiedName().equals(annotationType.getName())) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private Optional<BeanDefinitionVo> makeBeanDefinitionVo(CtMethod<?> method) {
@@ -120,31 +113,5 @@ public class FetchCreatedBeanProcesser {
         }
         log.warn("it is not created the bean. interfaceClassPath: {}", interfaceClassType);
         return Optional.empty();
-    }
-
-    private List<CtClass<CtElement>> getImportedClasses(CtClass<?> configElement) {
-        Import importAnnotation = configElement.getAnnotation(Import.class);
-        Class<?>[] importedClasses = importAnnotation.value();
-        List<CtClass<CtElement>> results = new ArrayList<>();
-        for (Class<?> importedClass : importedClasses) {
-            if (canIgnoreConfigClass(importedClass)) {
-                continue;
-            }
-            results.add(metadataResourceMap.get(importedClass.getName()).getElement());
-            SCANED_CONFIG_PATHS.add(importedClass.getName());
-        }
-        return results;
-    }
-
-    private boolean canIgnoreConfigClass(Class<?> importedClass) {
-        if (SCANED_CONFIG_PATHS.contains(importedClass.getName())) {
-            log.info("it has already scaned. importedClass: {}", importedClass.getName());
-            return true;
-        }
-        if (!this.metadataResourceMap.containsKey(importedClass.getName())) {
-            log.info("it is not scaned class. importedClass: {}", importedClass.getName());
-            return true;
-        }
-        return false;
     }
 }

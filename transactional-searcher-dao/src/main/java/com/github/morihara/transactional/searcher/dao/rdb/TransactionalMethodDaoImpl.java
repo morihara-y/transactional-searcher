@@ -37,10 +37,8 @@ public class TransactionalMethodDaoImpl implements TransactionalMethodDao {
                 .build();
         return TransactionalMethodDto.builder()
                 .transactionalMethodId(UUID.fromString(rs.getString("transactional_method_id")))
-                .sourceFolderPath(rs.getString("source_folder_path"))
                 .sourceCodeVo(sourceCodeVo)
                 .developStatus(DevelopStatusEnum.getEnum(rs.getString("develop_status")))
-                .ticketNo(rs.getInt("ticket_no"))
                 .build();
     };
 
@@ -51,29 +49,25 @@ public class TransactionalMethodDaoImpl implements TransactionalMethodDao {
         }
         final String sql = "insert into transactional_method ("
                 + "transactional_method_id, "
-                + "source_folder_path, "
                 + "package_name, "
                 + "class_name, "
                 + "method_name, "
                 + "method_param, "
                 + "method_type, "
-                + "develop_status, "
-                + "ticket_no"
-                + ") values (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                + "develop_status"
+                + ") values (?, ?, ?, ?, ?, ?, ?)";
         BatchPreparedStatementSetter pss = new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
                 TransactionalMethodDto transactionalMethodDto = transactionalMethodDtos.get(i);
                 int index = 0;
                 ps.setString(++index, transactionalMethodDto.getTransactionalMethodId().toString());
-                ps.setString(++index, transactionalMethodDto.getSourceFolderPath());
                 ps.setString(++index, transactionalMethodDto.getSourceCodeVo().getPackageName());
                 ps.setString(++index, transactionalMethodDto.getSourceCodeVo().getClassName());
                 ps.setString(++index, transactionalMethodDto.getSourceCodeVo().getMethodName());
                 ps.setString(++index, transactionalMethodDto.getSourceCodeVo().getMethodParam());
                 ps.setString(++index, transactionalMethodDto.getSourceCodeVo().getMethodType());
                 ps.setString(++index, transactionalMethodDto.getDevelopStatus().getText());
-                ps.setInt(++index, transactionalMethodDto.getTicketNo());
             }
             @Override
             public int getBatchSize() {
@@ -89,10 +83,9 @@ public class TransactionalMethodDaoImpl implements TransactionalMethodDao {
             return;
         }
         jdbc.update(
-                "update transactional_method set develop_status = ?, ticket_no = ?"
+                "update transactional_method set develop_status = ?"
                         + " where transactional_method_id = ?",
                 transactionalMethodDto.getDevelopStatus().getText(),
-                transactionalMethodDto.getTicketNo(),
                 transactionalMethodDto.getTransactionalMethodId());
     }
 

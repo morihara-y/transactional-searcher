@@ -13,9 +13,8 @@ import lombok.Data;
 @Data
 public class TransactionalMethodDto {
     private UUID transactionalMethodId;
-    private String sourceFolderPath;
     private SourceCodeVo sourceCodeVo;
     private DevelopStatusEnum developStatus;
-    private int ticketNo;
     private List<RelatedDaoCodeDto> relatedDaoCodes;
+    private String errorMessage;
 }

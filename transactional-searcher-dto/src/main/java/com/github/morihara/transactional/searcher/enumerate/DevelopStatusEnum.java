@@ -3,7 +3,7 @@ package com.github.morihara.transactional.searcher.enumerate;
 import lombok.Getter;
 
 public enum DevelopStatusEnum {
-    DEVELOPED("DEVELOPED"),
+    COLLECT_DEVELOPMENT("COLLECT_DEVELOPMENT"),
     IS_REQUIRED("IS_REQUIRED"),
     IS_NOT_REQUIRED("IS_NOT_REQUIRED");
 

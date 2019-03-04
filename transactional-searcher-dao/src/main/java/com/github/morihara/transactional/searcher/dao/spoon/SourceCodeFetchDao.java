@@ -11,11 +11,11 @@ public interface SourceCodeFetchDao {
     void walkJarFile(String jarPath, String jarName,
             Map<String, MetadataResourceVo> metadataResourceMap);
 
-    void makeBeanDefinitionMap(String configQualifiedName,
+    void makeBeanDefinitionMap(Class<?>[] annotationTypes,
             Map<String, List<BeanDefinitionVo>> beanDefinitionMap,
             Map<String, MetadataResourceVo> metadataResourceMap);
 
-    List<SourceCodeVo> fetchPublicMethodsByClassAnotation(Class<?> annotationType,
+    List<SourceCodeVo> fetchImplementedMethodsByClassAnotation(Class<?> annotationType,
             Map<String, MetadataResourceVo> metadataResourceMap);
 
     List<SourceCodeVo> fetchCalledMethodsByMethod(SourceCodeVo sourceCodeVo,
